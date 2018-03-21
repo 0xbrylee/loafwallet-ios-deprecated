@@ -1,10 +1,11 @@
 //
 //  NSString+Bitcoin.m
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 5/13/13.
 //  Copyright (c) 2013 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -34,10 +35,14 @@ static const UniChar base58chars[] = {
     'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
 };
 
+// 123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz - 58
+// s = [NSString base58WithData:[@"123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz" base58ToData]];
+
 @implementation NSString (Bitcoin)
 
 + (NSString *)base58WithData:(NSData *)d
 {
+//    NSLog(@"CALL_NSString_Bitcoin.m_base58WithData 1-1 : %@", d); //a
     if (! d) return nil;
     
     size_t i, z = 0;
@@ -68,16 +73,23 @@ static const UniChar base58chars[] = {
     while (z-- > 0) CFStringAppendCharacters(s, &base58chars[0], 1);
     while (i < sizeof(buf)) CFStringAppendCharacters(s, &base58chars[buf[i++]], 1);
     memset(buf, 0, sizeof(buf));
+    
+//    NSLog(@"CALL_NSString_Bitcoin.m_base58WithData 1-2: %@", s); //t
     return CFBridgingRelease(s);
 }
 
 + (NSString *)base58checkWithData:(NSData *)d
 {
+//    NSLog(@"CALL_NSString_Bitcoin.m_base58checkWithData 2-1: %@", d); //a
+    
     if (! d) return nil;
     
     NSMutableData *data = [NSMutableData secureDataWithData:d];
 
     [data appendBytes:d.SHA256_2.u32 length:4];
+    
+//    NSLog(@"CALL_NSString_Bitcoin.m_base58checkWithData 2-2 : %@", [self base58WithData:data]); //a
+    
     return [self base58WithData:data];
 }
 
@@ -101,6 +113,7 @@ static const UniChar base58chars[] = {
 // current coin selection code
 + (NSString *)addressWithScriptPubKey:(NSData *)script
 {
+//    NSLog(@"CALL_NSString_Bitcoin.m_addressWithScriptPubKey"); //a
     if (script == (id)[NSNull null]) return nil;
 
     NSArray *elem = [script scriptElements];
@@ -139,6 +152,7 @@ static const UniChar base58chars[] = {
 
 + (NSString *)addressWithScriptSig:(NSData *)script
 {
+    NSLog(@"CALL_NSString_Bitcoin.m_addressWithScriptSig"); //a
     if (script == (id)[NSNull null]) return nil;
 
     NSArray *elem = [script scriptElements];
@@ -175,6 +189,7 @@ static const UniChar base58chars[] = {
 
 - (NSData *)base58ToData
 {
+//    NSLog(@"CALL_NSString_Bitcoin.m_base58ToData"); //a
     size_t i, z = 0;
     
     while (z < self.length && [self characterAtIndex:z] == base58chars[0]) z++; // count leading zeroes
@@ -242,6 +257,7 @@ static const UniChar base58chars[] = {
 
 - (NSData *)base58checkToData
 {
+//    NSLog(@"CALL_NSString_Bitcoin.m_base58checkToData"); //a
     NSData *d = self.base58ToData;
     
     if (d.length < 4) return nil;
@@ -255,6 +271,7 @@ static const UniChar base58chars[] = {
 
 - (NSData *)hexToData
 {
+//    NSLog(@"CALL_NSString_Bitcoin.m_hexToData"); //a
     if (self.length % 2) return nil;
     
     NSMutableData *d = [NSMutableData secureDataWithCapacity:self.length/2];
@@ -294,6 +311,7 @@ static const UniChar base58chars[] = {
 
 - (NSData *)addressToHash160
 {
+//    NSLog(@"CALL_NSString_Bitcoin.m_addressToHash160"); //a
     NSData *d = self.base58checkToData;
 
     return (d.length == 160/8 + 1) ? [d subdataWithRange:NSMakeRange(1, d.length - 1)] : nil;
@@ -301,6 +319,7 @@ static const UniChar base58chars[] = {
 
 - (BOOL)isValidBitcoinAddress
 {
+//    NSLog(@"CALL_NSString_Bitcoin.m_isValidBitcoinAddress"); //a
     NSData *d = self.base58checkToData;
     
     if (d.length != 21) return NO;
@@ -316,6 +335,7 @@ static const UniChar base58chars[] = {
 
 - (BOOL)isValidBitcoinPrivateKey
 {
+//    NSLog(@"CALL_NSString_Bitcoin.m_isValidBitcoinPrivateKey"); //a
     NSData *d = self.base58checkToData;
     
     if (d.length == 33 || d.length == 34) { // wallet import format: https://en.bitcoin.it/wiki/Wallet_import_format
@@ -340,6 +360,7 @@ static const UniChar base58chars[] = {
 // BIP38 encrypted keys: https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki
 - (BOOL)isValidBitcoinBIP38Key
 {
+//    NSLog(@"CALL_NSString_Bitcoin.m_isValidBitcoinBIP38Key"); //a
     NSData *d = self.base58checkToData;
 
     if (d.length != 39) return NO; // invalid length

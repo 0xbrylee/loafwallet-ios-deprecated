@@ -5,6 +5,7 @@
 //  Created by Loshan T on 15/06/2016.
 //  Copyright © 2016 Aaron Voisine. All rights reserved.
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -37,6 +38,18 @@
 #import "BREventManager.h"
 #import "breadwallet-Swift.h"
 #import <WebKit/WebKit.h>
+
+
+/*
+ *  System Versioning Preprocessor Macros
+ */
+
+#define SYSTEM_VERSION_EQUAL_TO(v)                  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedSame)
+#define SYSTEM_VERSION_GREATER_THAN(v)              ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedDescending)
+#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
+#define SYSTEM_VERSION_LESS_THAN(v)                 ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
+#define SYSTEM_VERSION_LESS_THAN_OR_EQUAL_TO(v)     ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedDescending)
+
 
 #define TRANSACTION_CELL_HEIGHT 75
 
@@ -77,13 +90,28 @@ static NSString *dateFormat(NSString *template)
 {
     [super viewDidLoad];
 
+    
+    size_t size;
+    
+    sysctlbyname("hw.machine", NULL, &size, NULL, 0);
+    
+    char *machine = malloc(size);
+    
+    sysctlbyname("hw.machine", machine, &size, NULL, 0);
+    
+    NSString *platform =  [NSString stringWithCString:machine encoding:NSUTF8StringEncoding];
+    
+    free(machine);
+    
+//    NSLog(@"단말기 = %@", platform);
     if ([self respondsToSelector:@selector(edgesForExtendedLayout)])
         self.edgesForExtendedLayout = UIRectEdgeNone;
 
     self.txDates = [NSMutableDictionary dictionary];
     self.navigationController.delegate = self;
     self.moreTx = YES;
-
+    
+    
 //    if ([WKWebView class] && [[BRAPIClient sharedClient] featureEnabled:BRFeatureFlagsBuyBitcoin]) { // only available on iOS 8 and above
 //#if DEBUG
 //        self.buyController = [[BRWebViewController alloc] initWithBundleName:@"bread-buy-staging" mountPoint:@"/buy"];
@@ -101,7 +129,33 @@ static NSString *dateFormat(NSString *template)
     [super viewDidLayoutSubviews];
     CGRect rect = self.navigationController.navigationBar.frame;
     float y = rect.size.height + rect.origin.y;
-    self.tableView.contentInset = UIEdgeInsetsMake(y, 0, 0, 0);
+    
+    NSLog(@"rect y :%f",rect.size.height);
+    NSLog(@"self y :%f",self.view.frame.size.width);
+    NSLog(@"self height y :%f",self.view.frame.size.height);
+
+    //375.000000
+    // 7 :618.000000
+    
+    //375.000000
+    // 7 :618.000000
+    
+//    if (self.view.frame.size.width == 320) {
+//        self.tableView.contentInset = UIEdgeInsetsMake(40, 0, 0, 0);
+//    }else if(self.view.frame.size.width == 375){
+//        self.tableView.contentInset = UIEdgeInsetsMake(40, 0, 0, 0);
+//    }else{
+    
+    NSLog(@"self.tableView.frame.origin.y : %f",self.tableView.frame.origin.y);
+    
+    if (SYSTEM_VERSION_LESS_THAN(@"11.0")) {
+        self.tableView.contentInset = UIEdgeInsetsMake(40, 0, 0, 0);
+    }else{
+        self.tableView.contentInset = UIEdgeInsetsMake(-20, 0, 0, 0);
+    }
+//    }
+//    self.tableView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0);
+
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -125,7 +179,7 @@ static NSString *dateFormat(NSString *template)
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5*NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         self.transactions = @[tx, tx, tx, tx, tx, tx];
         [self.tableView reloadData];
-        self.navigationItem.title = [NSString stringWithFormat:@"%@  LTC", [manager stringForAmount:42980000]];
+        self.navigationItem.title = [NSString stringWithFormat:@"%@  TOS", [manager stringForAmount:42980000]];
     });
 
     return;
@@ -164,7 +218,7 @@ static NSString *dateFormat(NSString *template)
 
                                                                if (! [self.navigationItem.title isEqual:NSLocalizedString(@"syncing...", nil)]) {
                                                                    if (! manager.didAuthenticate) self.navigationItem.titleView = self.logo;
-                                                                   self.navigationItem.title = [NSString stringWithFormat:@"%@  LTC",
+                                                                   self.navigationItem.title = [NSString stringWithFormat:@"%@  TOS",
                                                                                                 [manager stringForAmount:manager.wallet.balance]];
                                                                }
 
@@ -204,7 +258,7 @@ static NSString *dateFormat(NSString *template)
         [[NSNotificationCenter defaultCenter] addObserverForName:BRPeerManagerSyncFinishedNotification object:nil
                                                            queue:nil usingBlock:^(NSNotification *note) {
                                                                if (! manager.didAuthenticate) self.navigationItem.titleView = self.logo;
-                                                               self.navigationItem.title = [NSString stringWithFormat:@"%@  LTC",
+                                                               self.navigationItem.title = [NSString stringWithFormat:@"%@  TOS",
                                                                                             [manager stringForAmount:manager.wallet.balance]];
                                                            }];
     }
@@ -214,7 +268,7 @@ static NSString *dateFormat(NSString *template)
         [[NSNotificationCenter defaultCenter] addObserverForName:BRPeerManagerSyncFailedNotification object:nil
                                                            queue:nil usingBlock:^(NSNotification *note) {
                                                                if (! manager.didAuthenticate) self.navigationItem.titleView = self.logo;
-                                                               self.navigationItem.title = [NSString stringWithFormat:@"%@  LTC",
+                                                               self.navigationItem.title = [NSString stringWithFormat:@"%@  TOS",
                                                                                             [manager stringForAmount:manager.wallet.balance]];
                                                            }];
     }
@@ -462,7 +516,7 @@ static NSString *dateFormat(NSString *template)
             if (self.moreTx && indexPath.row >= self.transactions.count) {
                 cell = [tableView dequeueReusableCellWithIdentifier:actionIdent];
                 cell.textLabel.text = (indexPath.row > 0) ? NSLocalizedString(@"more...", nil) :
-                NSLocalizedString(@"transaction history", nil);
+                NSLocalizedString(@"To view transaction history click here.", nil);
                 cell.imageView.image = nil;
             }
             else if (self.transactions.count > 0) {
@@ -496,15 +550,15 @@ static NSString *dateFormat(NSString *template)
                 tickChecked.hidden = YES;
                 unconfirmedLabel.hidden = NO;
                 tickUnchecked.hidden = NO;
-                unconfirmedLabel.backgroundColor = [UIColor lightGrayColor];
+//                unconfirmedLabel.backgroundColor = [UIColor lightGrayColor];
+//                unconfirmedLabel.layer.borderColor = sentLabel.textColor.CGColor;
                 detailTextLabel.text = [self dateForTx:tx];
 
                 if (confirms == 0 && ! [manager.wallet transactionIsValid:tx]) {
                     unconfirmedLabel.text = NSLocalizedString(@"INVALID", nil);
                     unconfirmedLabel.backgroundColor = [UIColor redColor];
                 }
-                else if (confirms == 0 && [manager.wallet transactionIsPending:tx]) {
-                    unconfirmedLabel.text = NSLocalizedString(@"pending", nil);
+                else if (confirms == 0 && [manager.wallet transactionIsPending:tx]) {                     unconfirmedLabel.text = NSLocalizedString(@"pending", nil);
                     unconfirmedLabel.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.2];
                     textLabel.textColor = [UIColor grayColor];
                 }

@@ -1,10 +1,11 @@
 //
 //  BRSendViewController.m
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 5/8/13.
 //  Copyright (c) 2013 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -42,10 +43,10 @@
 #import "BREventManager.h"
 #import "breadwallet-Swift.h"
 
-#define SCAN_TIP      NSLocalizedString(@"Scan someone else's QR code to get their bitcoin address. "\
+#define SCAN_TIP      NSLocalizedString(@"Scan someone else's QR code to get their TosCoin address. "\
                                          "You can send a payment to anyone with an address.", nil)
-#define CLIPBOARD_TIP NSLocalizedString(@"Bitcoin addresses can also be copied to the clipboard. "\
-                                         "A bitcoin address always starts with '1' or '3'.", nil)
+#define CLIPBOARD_TIP NSLocalizedString(@"TosCoin addresses can also be copied to the clipboard. "\
+                                         "A toscoin address always starts with '1' or '3'.", nil)
 
 #define LOCK @"\xF0\x9F\x94\x92" // unicode lock symbol U+1F512 (utf-8)
 #define REDX @"\xE2\x9D\x8C"     // unicode cross mark U+274C, red x emoji (utf-8)
@@ -93,6 +94,13 @@ static NSString *sanitizeString(NSString *s)
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
+//    [UINavigationBar appearance].tintColor = [UIColor whiteColor];
+//    NSMutableDictionary *attribute = [NSMutableDictionary dictionary];
+//    attribute[NSForegroundColorAttributeName] = [UIColor whiteColor];
+
+    [[NSUserDefaults standardUserDefaults] setBool:FALSE forKey:@DF_IS_RECOVER_MENU];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+
     self.addressView.layer.cornerRadius = 3;
     self.addressView.layer.borderWidth = 3;
     self.addressView.layer.borderColor = (__bridge CGColorRef _Nullable)([UIColor colorWithRed:242.0 green:249.0 blue:253.0 alpha:1.0]);
@@ -290,15 +298,15 @@ static NSString *sanitizeString(NSString *s)
                                              ([NSURL URLWithString:xsuccess].query.length > 0) ? @"&" : @"?",
                                              manager.wallet.receiveAddress]];
         }
-        else if (([url.host isEqual:@"litecoin-uri"] || [url.path isEqual:@"/litecoin-uri"]) && uri &&
-                 [[NSURL URLWithString:uri].scheme isEqual:@"litecoin"]) {
+        else if (([url.host isEqual:@"toscoin-uri"] || [url.path isEqual:@"/toscoin-uri"]) && uri &&
+                 [[NSURL URLWithString:uri].scheme isEqual:@"TosCoin"]) {
             if (xsuccess) self.callback = [NSURL URLWithString:xsuccess];
             [self handleURL:[NSURL URLWithString:uri]];
         }
         
         if (callback) [[UIApplication sharedApplication] openURL:callback];
     }
-    else if ([url.scheme isEqual:@"litecoin"]) {
+    else if ([url.scheme isEqual:@"TosCoin"]) {
         [self confirmRequest:[BRPaymentRequest requestWithURL:url]];
     } else if ([BRBitID isBitIDURL:url]) {
         [self handleBitIDURL:url];
@@ -330,7 +338,7 @@ static NSString *sanitizeString(NSString *s)
                 
                 if (error) {
                     [[[UIAlertView alloc]
-                      initWithTitle:NSLocalizedString(@"couldn't transmit payment to bitcoin network", nil)
+                      initWithTitle:NSLocalizedString(@"couldn't transmit payment to toscoin network", nil)
                       message:error.localizedDescription delegate:nil cancelButtonTitle:NSLocalizedString(@"ok", nil)
                       otherButtonTitles:nil] show];
                 }
@@ -411,7 +419,7 @@ static NSString *sanitizeString(NSString *s)
     };
     
     NSString *message = [NSString stringWithFormat:
-                         NSLocalizedString(@"%@ is requesting authentication using your bitcoin wallet.", nil),
+                         NSLocalizedString(@"%@ is requesting authentication using your toscoin wallet.", nil),
                          bitid.siteName];
     UIAlertController *alertController =
         [UIAlertController alertControllerWithTitle:NSLocalizedString(@"BitID Authentication Request", nil)
@@ -459,7 +467,7 @@ memo:(NSString *)memo isSecure:(BOOL)isSecure
             [self confirmSweep:request.paymentAddress];
         }
         else {
-            [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"not a valid bitcoin address", nil)
+            [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"not a valid toscoin address", nil)
               message:request.paymentAddress delegate:nil cancelButtonTitle:NSLocalizedString(@"ok", nil)
               otherButtonTitles:nil] show];
             [self cancel:nil];
@@ -524,7 +532,7 @@ memo:(NSString *)memo isSecure:(BOOL)isSecure
         self.request = protoReq;
         self.okAddress = address;
         [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"WARNING", nil)
-          message:NSLocalizedString(@"\nADDRESS ALREADY USED\n\nbitcoin addresses are intended for single use only\n\n"
+          message:NSLocalizedString(@"\nADDRESS ALREADY USED\n\ntoscoin addresses are intended for single use only\n\n"
                                     "re-use reduces privacy for both you and the recipient and can result in loss if "
                                     "the recipient doesn't directly control the address", nil)
           delegate:self cancelButtonTitle:nil
@@ -558,14 +566,14 @@ memo:(NSString *)memo isSecure:(BOOL)isSecure
         }
         else amountController.to = address;
 
-        amountController.navigationItem.title = [NSString stringWithFormat:@"%@  LTC",
+        amountController.navigationItem.title = [NSString stringWithFormat:@"%@  TOS",
                                                  [manager stringForAmount:manager.wallet.balance]];
         [self.navigationController pushViewController:amountController animated:YES];
         return;
     }
     else if (amount < TX_MIN_OUTPUT_AMOUNT) {
         [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"couldn't make payment", nil)
-          message:[NSString stringWithFormat:NSLocalizedString(@"bitcoin payments can't be less than %@", nil),
+          message:[NSString stringWithFormat:NSLocalizedString(@"toscoin payments can't be less than %@", nil),
                    [manager stringForAmount:TX_MIN_OUTPUT_AMOUNT]] delegate:nil
           cancelButtonTitle:NSLocalizedString(@"ok", nil) otherButtonTitles:nil] show];
         [self cancel:nil];
@@ -573,7 +581,7 @@ memo:(NSString *)memo isSecure:(BOOL)isSecure
     }
     else if (outputTooSmall) {
         [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"couldn't make payment", nil)
-          message:[NSString stringWithFormat:NSLocalizedString(@"bitcoin transaction outputs can't be less than %@",
+          message:[NSString stringWithFormat:NSLocalizedString(@"toscoin transaction outputs can't be less than %@",
                                                                nil), [manager stringForAmount:TX_MIN_OUTPUT_AMOUNT]]
           delegate:nil cancelButtonTitle:NSLocalizedString(@"ok", nil) otherButtonTitles:nil] show];
         [self cancel:nil];
@@ -638,7 +646,7 @@ memo:(NSString *)memo isSecure:(BOOL)isSecure
 
                 if (amount > 0 && amount < self.amount) {
                     [[[UIAlertView alloc]
-                      initWithTitle:NSLocalizedString(@"insufficient funds for bitcoin network fee", nil)
+                      initWithTitle:NSLocalizedString(@"insufficient funds for toscoin network fee", nil)
                       message:[NSString stringWithFormat:NSLocalizedString(@"reduce payment amount by\n%@?", nil),
                                [manager stringForAmount:self.amount - amount]] delegate:self
                       cancelButtonTitle:NSLocalizedString(@"cancel", nil)
@@ -648,7 +656,7 @@ memo:(NSString *)memo isSecure:(BOOL)isSecure
                 }
                 else {
                     [[[UIAlertView alloc]
-                      initWithTitle:NSLocalizedString(@"insufficient funds for bitcoin network fee", nil) message:nil
+                      initWithTitle:NSLocalizedString(@"insufficient funds for toscoin network fee", nil) message:nil
                       delegate:self cancelButtonTitle:NSLocalizedString(@"ok", nil) otherButtonTitles:nil] show];
                 }
             }
@@ -665,10 +673,10 @@ memo:(NSString *)memo isSecure:(BOOL)isSecure
 
     if (! [manager.wallet signTransaction:tx withPrompt:prompt]) {
         [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"couldn't make payment", nil)
-          message:NSLocalizedString(@"error signing bitcoin transaction", nil) delegate:nil
+          message:NSLocalizedString(@"error signing toscoin transaction", nil) delegate:nil
           cancelButtonTitle:NSLocalizedString(@"ok", nil) otherButtonTitles:nil] show];
     }
-
+    
     if (! didAuth) manager.didAuthenticate = NO;
 
     if (! tx.isSigned) { // user canceled authentication
@@ -809,7 +817,7 @@ memo:(NSString *)memo isSecure:(BOOL)isSecure
                 self.sweepTx = tx;
 
                 NSString *alertFmt = NSLocalizedString(@"Send %@ from this private key into your wallet? "
-                                                       "The bitcoin network will receive a fee of %@.", nil);
+                                                       "The toscoin network will receive a fee of %@.", nil);
                 NSString *alertMsg = [NSString stringWithFormat:alertFmt, [manager stringForAmount:amount], [manager stringForAmount:fee]];
                 [[[UIAlertView alloc] initWithTitle:@"" message:alertMsg delegate:self
                   cancelButtonTitle:NSLocalizedString(@"cancel", nil)
@@ -944,7 +952,7 @@ memo:(NSString *)memo isSecure:(BOOL)isSecure
                 text = (req.label.length > 0) ? sanitizeString(req.label) : req.paymentAddress;
                 break;
             }
-            else if ([s hasPrefix:@"litecoin:"]) {
+            else if ([s hasPrefix:@"TosCoin:"]) {
                 text = sanitizeString(s);
                 break;
             }
@@ -977,7 +985,7 @@ memo:(NSString *)memo isSecure:(BOOL)isSecure
         if (data.length == sizeof(UInt256) && [manager.wallet transactionForHash:*(UInt256 *)data.bytes]) continue;
         
         if ([req.paymentAddress isValidBitcoinAddress] || [str isValidBitcoinPrivateKey] ||
-            [str isValidBitcoinBIP38Key] || (req.r.length > 0 && [req.scheme isEqual:@"litecoin"])) {
+            [str isValidBitcoinBIP38Key] || (req.r.length > 0 && [req.scheme isEqual:@"TosCoin"])) {
             [self performSelector:@selector(confirmRequest:) withObject:req afterDelay:0.1];// delayed to show highlight
             return;
         }
@@ -987,7 +995,7 @@ memo:(NSString *)memo isSecure:(BOOL)isSecure
                     if (error) { // don't try any more BIP73 urls
                         [self payFirstFromArray:[array objectsAtIndexes:[array
                         indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-                            return (idx >= i && ([obj hasPrefix:@"litecoin:"] || ! [NSURL URLWithString:obj]));
+                            return (idx >= i && ([obj hasPrefix:@"TosCoin:"] || ! [NSURL URLWithString:obj]));
                         }]]];
                     }
                     else [self confirmProtocolRequest:req];
@@ -999,7 +1007,7 @@ memo:(NSString *)memo isSecure:(BOOL)isSecure
     }
     
     [[[UIAlertView alloc] initWithTitle:@""
-      message:NSLocalizedString(@"clipboard doesn't contain a valid bitcoin address", nil) delegate:nil
+      message:NSLocalizedString(@"clipboard doesn't contain a valid toscoin address", nil) delegate:nil
       cancelButtonTitle:NSLocalizedString(@"ok", nil) otherButtonTitles:nil] show];
     [self performSelector:@selector(cancel:) withObject:self afterDelay:0.1];
 }
@@ -1138,7 +1146,7 @@ fromConnection:(AVCaptureConnection *)connection
                 [self handleBitIDURL:request.url];
                 [self resetQRGuide];
             }];
-        } else if ((request.isValid && [request.scheme isEqual:@"litecoin"]) || [addr isValidBitcoinPrivateKey] ||
+        } else if ((request.isValid && [request.scheme isEqual:@"TosCoin"]) || [addr isValidBitcoinPrivateKey] ||
                    [addr isValidBitcoinBIP38Key]) {
             self.scanController.cameraGuide.image = [UIImage imageNamed:@"cameraguide-green"];
             [self.scanController stop];
@@ -1205,13 +1213,13 @@ fromConnection:(AVCaptureConnection *)connection
                     else {
                         self.scanController.cameraGuide.image = [UIImage imageNamed:@"cameraguide-red"];
                         
-                        if (([request.scheme isEqual:@"litecoin"] && request.paymentAddress.length > 1) ||
+                        if (([request.scheme isEqual:@"TosCoin"] && request.paymentAddress.length > 1) ||
                             [request.paymentAddress hasPrefix:@"L"] || [request.paymentAddress hasPrefix:@"3"]) {
                             self.scanController.message.text = [NSString stringWithFormat:@"%@:\n%@",
-                                                                NSLocalizedString(@"not a valid bitcoin address", nil),
+                                                                NSLocalizedString(@"not a valid toscoin address", nil),
                                                                 request.paymentAddress];
                         }
-                        else self.scanController.message.text = NSLocalizedString(@"not a bitcoin QR code", nil);
+                        else self.scanController.message.text = NSLocalizedString(@"not a toscoin QR code", nil);
                         
                         [self performSelector:@selector(resetQRGuide) withObject:nil afterDelay:0.35];
                         [BREventManager saveEvent:@"send:unsuccessful_bip73"];
@@ -1267,12 +1275,14 @@ fromConnection:(AVCaptureConnection *)connection
 
 - (BOOL)textViewShouldBeginEditing:(UITextView *)textView
 {
+    NSLog(@"TEST_textView 18"); //c
     if ([self nextTip]) return NO;
     return YES;
 }
 
 - (void)textViewDidBeginEditing:(UITextView *)textView
 {
+    NSLog(@"TEST_textView 19"); //c
     //BUG: XXX this needs to take keyboard size into account
     self.useClipboard = NO;
     self.clipboardText.text = [UIPasteboard generalPasteboard].string;
@@ -1290,14 +1300,17 @@ fromConnection:(AVCaptureConnection *)connection
 //        self.view.center = CGPointMake(self.view.center.x, self.view.bounds.size.height/2.0);
 //        self.sendLabel.alpha = 1.0;
 //    } completion:nil];
-    
+    NSLog(@"TEST_textView 20"); //c
     if (! self.useClipboard) [UIPasteboard generalPasteboard].string = textView.text;
     [self updateClipboardText];
 }
 
-- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range
+    replacementText:(NSString *)text
 {
+    NSLog(@"TEST_textView 21"); //c
     if ([text isEqual:@"\n"]) {
+        NSLog(@"TEST_textView 22"); //c
         [textView resignFirstResponder];
         return NO;
     }

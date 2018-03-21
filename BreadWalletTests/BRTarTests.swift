@@ -1,6 +1,6 @@
 //
 //  BRTarTests.swift
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Samuel Sutch on 12/1/15.
 //  Copyright (c) 2016 breadwallet LLC

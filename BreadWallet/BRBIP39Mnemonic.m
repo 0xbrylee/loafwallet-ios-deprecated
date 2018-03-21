@@ -1,10 +1,11 @@
 //
 //  BRBIP39Mnemonic.m
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 3/21/14.
 //  Copyright (c) 2014 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -46,6 +47,7 @@
 
 - (NSArray *)words
 {
+//    NSLog(@"Call_BRBIP39Mnemonic.m Method(words)"); //a
     if (! _words) {
         _words = [NSArray arrayWithContentsOfFile:[[NSBundle mainBundle] pathForResource:WORDS ofType:@"plist"]];
     }
@@ -55,6 +57,7 @@
 
 - (NSSet *)allWords
 {
+//    NSLog(@"Call_BRBIP39Mnemonic.m Method(allWords)"); //a
     if (! _allWords) {
         NSMutableSet *allWords = [NSMutableSet set];
         
@@ -71,14 +74,16 @@
 
 - (NSString *)encodePhrase:(NSData *)data
 {
+//    NSLog(@"Call_BRBIP39Mnemonic.m Method(encodePhrase)"); //a
+//    NSLog(@"TEST_BRBIP39Mnemonic.m(encodePhrase)_data : %@", data); //t
     if (! data || (data.length % 4) != 0) return nil; // data length must be a multiple of 32 bits
 
     uint32_t n = (uint32_t)self.words.count, x;
     NSMutableArray *a =
         CFBridgingRelease(CFArrayCreateMutable(SecureAllocator(), data.length*3/4, &kCFTypeArrayCallBacks));
-    NSMutableData *d = [NSMutableData secureDataWithData:data];
+    NSMutableData *d = [NSMutableData secureDataWithData:data]; // (== data)
     UInt256 sha256 = data.SHA256;
-
+    
     [d appendBytes:&sha256 length:sizeof(sha256)]; // append SHA256 checksum
 
     for (int i = 0; i < data.length*3/4; i++) {
@@ -93,6 +98,7 @@
 // phrase must be normalized
 - (NSData *)decodePhrase:(NSString *)phrase
 {
+//    NSLog(@"Call_BRBIP39Mnemonic.m Method(decodePhrase)"); //a
     NSArray *a = CFBridgingRelease(CFStringCreateArrayBySeparatingStrings(SecureAllocator(),
                                    (CFStringRef)[self normalizePhrase:phrase], CFSTR(" ")));
     NSMutableData *d = [NSMutableData secureDataWithCapacity:(a.count*11 + 7)/8];
@@ -100,7 +106,7 @@
     uint8_t b;
 
     if ((a.count % 3) != 0 || a.count > 24) {
-        NSLog(@"phrase has wrong number of words");
+//        NSLog(@"phrase has wrong number of words");
         return nil;
     }
 
@@ -109,7 +115,7 @@
         y = (i*8/11 + 1 < a.count) ? (uint32_t)[self.words indexOfObject:a[i*8/11 + 1]] : 0;
 
         if (x == (uint32_t)NSNotFound || y == (uint32_t)NSNotFound) {
-            NSLog(@"phrase contained unknown word: %@", a[i*8/11 + (x == (uint32_t)NSNotFound ? 0 : 1)]);
+//            NSLog(@"phrase contained unknown word: %@", a[i*8/11 + (x == (uint32_t)NSNotFound ? 0 : 1)]);
             return nil;
         }
 
@@ -121,7 +127,7 @@
     d.length = a.count*4/3;
 
     if (b != (d.SHA256.u8[0] >> (8 - a.count/3))) {
-        NSLog(@"incorrect phrase, bad checksum");
+//        NSLog(@"incorrect phrase, bad checksum");
         return nil;
     }
 
@@ -134,24 +140,28 @@
 // true if word is a member of any known word list
 - (BOOL)wordIsValid:(NSString *)word
 {
+//    NSLog(@"Call_BRBIP39Mnemonic.m Method(wordIsValid)"); //a
     return [self.allWords containsObject:word];
 }
 
 // true if word is a member of the word list for the current locale
 - (BOOL)wordIsLocal:(NSString *)word
 {
+//    NSLog(@"Call_BRBIP39Mnemonic.m Method(wordIsLocal)"); //a
     return [self.words containsObject:word];
 }
 
 // true if all words and checksum are valid, phrase must be normalized
 - (BOOL)phraseIsValid:(NSString *)phrase
 {
+//    NSLog(@"Call_BRBIP39Mnemonic.m Method(phraseIsValid)"); //a
     return ([self decodePhrase:phrase] == nil) ? NO : YES;
 }
 
 // minimally cleans up user input phrase, suitable for display/editing
 - (NSString *)cleanupPhrase:(NSString *)phrase
 {
+//    NSLog(@"Call_BRBIP39Mnemonic.m Method(cleanupPhrase)"); //a
     static NSCharacterSet *invalid = nil, *ws = nil;
     static dispatch_once_t onceToken = 0;
     NSMutableString *s = CFBridgingRelease(CFStringCreateMutableCopy(SecureAllocator(), 0,
@@ -204,6 +214,8 @@
 // normalizes phrase, suitable for decode/derivation
 - (NSString *)normalizePhrase:(NSString *)phrase
 {
+//    NSLog(@"Call_BRBIP39Mnemonic.m Method(normalizePhrase)"); //a
+//    NSLog(@"TEST_BRBIP39Mnemonic.m_normailizePhrase(phrase) : %@", phrase);
     if (! phrase) return nil;
 
     NSMutableString *s = CFBridgingRelease(CFStringCreateMutableCopy(SecureAllocator(), 0, (CFStringRef)phrase));
@@ -229,22 +241,46 @@
 // phrase must be normalized
 - (NSData *)deriveKeyFromPhrase:(NSString *)phrase withPassphrase:(NSString *)passphrase
 {
+//    NSLog(@"Call_BRBIP39Mnemonic.m Method(deriveKeyFromPhrase)"); //a
     if (! phrase) return nil;
     
     NSMutableData *key = [NSMutableData secureDataWithLength:sizeof(UInt512)];
+//    NSLog(@"TEST_BIP39(before) : %@", key); //t
+    
     NSData *password, *salt;
     CFMutableStringRef pw = CFStringCreateMutableCopy(SecureAllocator(), 0, (CFStringRef)phrase);
     CFMutableStringRef s = CFStringCreateMutableCopy(SecureAllocator(), 0, CFSTR("mnemonic"));
+//    NSLog(@"TEST_BRBIP39Mnemonic.m(deriveKeyFromPhrase)_pw(before) : %@", pw); //t // BIP39 Memonic(String)
+//    NSLog(@"TEST_BRBIP39Mnemonic.m(deriveKeyFromPhrase)_s(before) : %@", s); //t // Phrase string
 
     if (passphrase) CFStringAppend(s, (CFStringRef)passphrase);
     CFStringNormalize(pw, kCFStringNormalizationFormKD);
     CFStringNormalize(s, kCFStringNormalizationFormKD);
     password = CFBridgingRelease(CFStringCreateExternalRepresentation(SecureAllocator(), pw, kCFStringEncodingUTF8, 0));
     salt = CFBridgingRelease(CFStringCreateExternalRepresentation(SecureAllocator(), s, kCFStringEncodingUTF8, 0));
+
+//    NSLog(@"TEST_BRBIP39Mnemonic.m(deriveKeyFromPhrase)_password : %@", password); //t // BIP39 Memonic(String) to 16hex
+//    NSLog(@"TEST_BRBIP39Mnemonic.m(deriveKeyFromPhrase)_salt : %@", salt); //t // Phrase string to salt(16 hex)
+    
     CFRelease(pw);
     CFRelease(s);
 
-    PBKDF2(key.mutableBytes, key.length, SHA512, 64, password.bytes, password.length, salt.bytes, salt.length, 2048);
+//    NSLog(@"TEST_BIP39(PBKDFE(BEFORE)) : %@", key); //t // BIP39 Seed
+//
+//    NSLog(@"----------------"); //t
+//    NSLog(@"key.mutableBytes : %lu", (unsigned long)key.mutableBytes); //t
+//    NSLog(@"key.length : %lu", (unsigned long)key.length); //t
+//    NSLog(@"SHA512 : %lu", (unsigned long)SHA512); //t
+//    NSLog(@"password.bytes : %lu", (unsigned long)password.bytes); //t
+//    NSLog(@"password.length : %lu" , (unsigned long)password.length); //t
+//    NSLog(@"salt.bytes : %lu", (unsigned long)salt.bytes); //t
+//    NSLog(@"salt.length : %lu", (unsigned long)salt.length); //t
+//    NSLog(@"----------------"); //t
+    
+    //[ ]testBIP32SequenceSerializedPrivateMasterFromSeed()]; //t
+    
+    PBKDF2(key.mutableBytes, key.length, SHA512, 64, password.bytes, password.length, salt.bytes, salt.length, 2048); //t
+//    NSLog(@"TEST_BRBIP39Mnemonic.m(deriveKeyFromPhrase)_key==BIP39 Seed : %@", key); //t // BIP39 Seed
     return key;
 }
 

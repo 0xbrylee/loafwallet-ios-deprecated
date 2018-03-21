@@ -1,10 +1,11 @@
 //
 //  BRSettingsViewController.m
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 12/3/14.
 //  Copyright (c) 2014 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -55,6 +56,10 @@
 {
     [super viewDidLoad];
     self.touchId = [BRWalletManager sharedInstance].touchIdEnabled;
+    
+    [[NSUserDefaults standardUserDefaults] setBool:TRUE forKey:@DF_IS_RECOVER_MENU];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+
 }
 
 
@@ -87,6 +92,10 @@
                 [(id)[self.navigationController.topViewController.view viewWithTag:412] setText:self.stats];
             }];
     }
+    
+//    self.navigationItem.leftBarButtonItem.image = [UIImage imageNamed:@"allow"];
+//    self.navigationItem.rightBarButtonItem.image = [UIImage imageNamed:@"allow"];
+
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -114,6 +123,17 @@
     if (self.txStatusObserver) [[NSNotificationCenter defaultCenter] removeObserver:self.txStatusObserver];
 }
 
+- (IBAction)back:(id)sender
+{
+    [BREventManager saveEvent:@"settings:back"];
+    
+//    if (self.navigationController.presentingViewController) {
+//        [self.navigationController.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+//    }
+//    else [self.navigationController popViewControllerAnimated:NO];
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
 - (BRWebViewController *)eaController {
     if (_eaController) {
         return _eaController;
@@ -138,7 +158,11 @@
     _selectorController.transitioningDelegate = self.navigationController.viewControllers.firstObject;
     _selectorController.tableView.dataSource = self;
     _selectorController.tableView.delegate = self;
-    _selectorController.tableView.backgroundColor = [UIColor clearColor];
+    _selectorController.tableView.backgroundColor = [UIColor whiteColor];
+    
+//    UIImageView *tableBg = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"wallpaper-default"]];
+//    [_selectorController.tableView insertSubview:tableBg atIndex:0];
+    
     return _selectorController;
 }
 
@@ -158,11 +182,11 @@
         fmt.dateFormat = [NSDateFormatter dateFormatFromTemplate:@"Mdjma" options:0 locale:[NSLocale currentLocale]];
     }
 
-   return [NSString stringWithFormat:NSLocalizedString(@"rate: %@ = %@\nupdated: %@\nblock #%d of %d\n"
-                                                       "connected peers: %d\ndl peer: %@", NULL),
-           [manager localCurrencyStringForAmount:SATOSHIS/manager.localCurrencyPrice],
-           [manager stringForAmount:SATOSHIS/manager.localCurrencyPrice],
-           [fmt stringFromDate:[NSDate dateWithTimeIntervalSinceReferenceDate:manager.secureTime]].lowercaseString,
+   return [NSString stringWithFormat:NSLocalizedString(@"\n\nblock #%d of %d\n"
+                                                       "connected peers: %d\ndl peer: %@", NULL), // rate: %@ = %@\nupdated: %@
+           //[manager localCurrencyStringForAmount:SATOSHIS/manager.localCurrencyPrice],
+           //[manager stringForAmount:SATOSHIS/manager.localCurrencyPrice],
+           //[fmt stringFromDate:[NSDate dateWithTimeIntervalSinceReferenceDate:manager.secureTime]].lowercaseString,
            [BRPeerManager sharedInstance].lastBlockHeight,
            [BRPeerManager sharedInstance].estimatedBlockHeight,
            [BRPeerManager sharedInstance].peerCount,
@@ -179,7 +203,7 @@
 
 - (IBAction)about:(id)sender
 {
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"mailto:contact@loafwallet.xyz"]];
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"mailto:admin@tosblock.com"]]; // Settings-about
 }
 
 #if DEBUG
@@ -208,6 +232,7 @@
      popOutAfterDelay:2.0]];
 }
 #endif
+
 
 - (IBAction)touchIdLimit:(id)sender
 {
@@ -264,7 +289,7 @@
 
     switch (section) {
         case 0: return 2;
-        case 1: return (self.touchId) ? 3 : 2;
+        case 1: return (self.touchId) ? 2 : 1;
         case 2: return 3;
 //        case 3: return 1;
     }
@@ -310,12 +335,12 @@
 
         case 1:
             switch (indexPath.row) {
-                case 0:
-                    cell = [tableView dequeueReusableCellWithIdentifier:selectorIdent];
-                    cell.detailTextLabel.text = manager.localCurrencyCode;
-                    break;
+//                case 0:
+//                    cell = [tableView dequeueReusableCellWithIdentifier:selectorIdent];
+//                    cell.detailTextLabel.text = manager.localCurrencyCode;
+//                    break;
 
-                case 1:
+                case 0:
                     if (self.touchId) {
                         cell = [tableView dequeueReusableCellWithIdentifier:selectorIdent];
                         cell.textLabel.text = NSLocalizedString(@"touch id limit", nil);
@@ -324,7 +349,7 @@
                         goto _switch_cell;
                     }
                     break;
-                case 2:
+                case 1:
                 {
 _switch_cell:
                     cell = [tableView dequeueReusableCellWithIdentifier:@"SwitchCell" forIndexPath:indexPath];
@@ -421,7 +446,7 @@ _switch_cell:
     titleLabel.text = [self tableView:tableView titleForHeaderInSection:section];
     titleLabel.backgroundColor = [UIColor clearColor];
     titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:13];
-    titleLabel.textColor = [UIColor whiteColor];
+    titleLabel.textColor = [UIColor blackColor];
 //    titleLabel.shadowColor = [UIColor whiteColor];
 //    titleLabel.shadowOffset = CGSizeMake(0.0, 1.0);
     titleLabel.numberOfLines = 0;
@@ -451,6 +476,10 @@ _switch_cell:
     UILabel *l = (id)[c.view viewWithTag:411];
     NSMutableAttributedString *s = [[NSMutableAttributedString alloc] initWithAttributedString:l.attributedText];
 
+//    UIButton *backNavi = nil;
+//    backNavi = (id)[c.view viewWithTag:414];
+//    [backNavi addTarget:self action:@selector(copyLogs:) forControlEvents:UIControlEventTouchUpInside];
+
 #if BITCOIN_TESTNET
     [s replaceCharactersInRange:[s.string rangeOfString:@"%net%"] withString:@"%net% (testnet)"];
 #endif
@@ -471,8 +500,21 @@ _switch_cell:
     }
 #endif
 
+    c.title = @"about";
+
+//    [c.navigationItem.leftBarButtonItem setAction:@selector(copyLogs:)];
+    
     [(id)[c.view viewWithTag:412] setText:self.stats];
+    [(id)[c.view viewWithTag:412] setTextColor:[UIColor whiteColor]];
+
+//    c.navigationItem.leftBarButtonItem.image = [UIImage imageNamed:@"allow"];
+//    c.navigationItem.leftBarButtonItem.isEnabled = YES;
     [self.navigationController pushViewController:c animated:YES];
+
+//    [NSObject cancelPreviousPerformRequestsWithTarget:c.navigationItem.leftBarButtonItem.image selector:@selector(copyLogs:) object:nil];
+
+//    [bb addTarget:self action:@selector(copyLogs:) forControlEvents:UIControlEventTouchUpInside];
+
 }
 
 - (void)showRecoveryPhrase
@@ -481,7 +523,7 @@ _switch_cell:
     [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"WARNING", nil)
       message:[NSString stringWithFormat:@"\n%@\n\n%@\n\n%@\n",
                [NSLocalizedString(@"\nDO NOT let anyone see your recovery\n"
-                                  "phrase or they can spend your bitcoins.\n", nil)
+                                  "phrase or they can spend your toscoins.\n", nil)
                 stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]],
                [NSLocalizedString(@"\nNEVER type your recovery phrase into\n"
                                   "password managers or elsewhere.\n"
@@ -585,12 +627,10 @@ _switch_cell:
 
         case 1:
             switch (indexPath.row) {
-                case 0: // local currency
-                    [self showCurrencySelector];
-
-                    break;
-
-                case 1: // touch id spending limit
+//                case 0: // local currency
+//                    [self showCurrencySelector];
+//                    break;
+                case 0: // touch id spending limit
                     if (self.touchId) {
                         [self performSelector:@selector(touchIdLimit:) withObject:nil afterDelay:0.0];
                         break;
@@ -598,7 +638,7 @@ _switch_cell:
                         goto _deselect_switch;
                     }
                     break;
-                case 2:
+                case 1:
 _deselect_switch:
                     {
                         [tableView deselectRowAtIndexPath:indexPath animated:YES];
@@ -645,7 +685,8 @@ _deselect_switch:
 
     BRSeedViewController *seedController
         = [self.storyboard instantiateViewControllerWithIdentifier:@"SeedViewController"];
-
+    seedController.title = NSLocalizedString(@"recovery phrase", nil);
+    
     if (seedController.authSuccess) {
         [self.navigationController pushViewController:seedController animated:YES];
     } else {

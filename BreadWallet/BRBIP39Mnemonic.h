@@ -1,10 +1,11 @@
 //
 //  BRBIP39Mnemonic.h
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 3/21/14.
 //  Copyright (c) 2014 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +32,8 @@
 // https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki
 
 #define BIP39_CREATION_TIME (1388534400.0 - NSTimeIntervalSince1970)
+//#define BIP39_CREATION_TIME 1512099642
+
 
 @interface BRBIP39Mnemonic : NSObject<BRMnemonic>
 

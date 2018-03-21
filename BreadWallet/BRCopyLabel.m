@@ -1,10 +1,11 @@
 //
 //  BRCopyLabel.m
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 6/21/14.
 //  Copyright (c) 2014 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal

@@ -1,10 +1,11 @@
 //
 //  BRBIP32Sequence.m
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 7/19/13.
 //  Copyright (c) 2013 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,10 +30,14 @@
 #import "NSString+Bitcoin.h"
 #import "NSData+Bitcoin.h"
 #import "NSMutableData+Bitcoin.h"
+#import <Foundation/Foundation.h> //t
 
 #define BIP32_SEED_KEY "Bitcoin seed"
+//#define BIP32_XPRV     "76066276" //t // "\x04\x88\xAD\xE4"  0488ADE4
+//#define BIP32_XPUB     "76067358" //t // "\x04\x88\xB2\x1E"  0488B21E
 #define BIP32_XPRV     "\x04\x88\xAD\xE4"
 #define BIP32_XPUB     "\x04\x88\xB2\x1E"
+
 
 // BIP32 is a scheme for deriving chains of addresses from a seed value
 // https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
@@ -53,6 +58,7 @@
 //
 static void CKDpriv(UInt256 *k, UInt256 *c, uint32_t i)
 {
+//    NSLog(@"Call_ Function(CKDpriv)"); //a
     uint8_t buf[sizeof(BRECPoint) + sizeof(i)];
     UInt512 I;
     
@@ -89,7 +95,8 @@ static void CKDpriv(UInt256 *k, UInt256 *c, uint32_t i)
 //
 static void CKDpub(BRECPoint *K, UInt256 *c, uint32_t i)
 {
-    if (i & BIP32_HARD) return; // can't derive private child key from public parent key
+//    NSLog(@"Call_BRBIP32Sequence.m Function(CKDpub)"); //a
+    if (i & BIP32_HARD ) return; // can't derive private child key from public parent key
 
     uint8_t buf[sizeof(*K) + sizeof(i)];
     UInt512 I;
@@ -109,9 +116,12 @@ static void CKDpub(BRECPoint *K, UInt256 *c, uint32_t i)
 // helper function for serializing BIP32 master public/private keys to standard export format
 static NSString *serialize(uint8_t depth, uint32_t fingerprint, uint32_t child, UInt256 chain, NSData *key)
 {
+//    NSLog(@"Call_BRBIP32Sequence.m Function(serialize)"); //a
     NSMutableData *d = [NSMutableData secureDataWithCapacity:14 + key.length + sizeof(chain)];
 
     fingerprint = CFSwapInt32HostToBig(fingerprint);
+
+    NSLog(@"TEST_fingerprint : %u", fingerprint); //t
     child = CFSwapInt32HostToBig(child);
 
     [d appendBytes:key.length < 33 ? BIP32_XPRV : BIP32_XPUB length:4];
@@ -121,7 +131,8 @@ static NSString *serialize(uint8_t depth, uint32_t fingerprint, uint32_t child, 
     [d appendBytes:&chain length:sizeof(chain)];
     if (key.length < 33) [d appendBytes:"\0" length:1];
     [d appendData:key];
-
+    
+//    NSLog(@"TEST_BRBIP32Sequence.m(serialize)_base58checkWithData : %@", [NSString base58checkWithData:d]); //t
     return [NSString base58checkWithData:d];
 }
 
@@ -133,45 +144,51 @@ static NSString *serialize(uint8_t depth, uint32_t fingerprint, uint32_t child, 
 // the values are taken from BIP32 account m/0H
 - (NSData *)masterPublicKeyFromSeed:(NSData *)seed
 {
+//    NSLog(@"Call_BRBIP32Sequence.m Method(masterPublicKeyFromSeed)_seed : %@", seed); //a
     if (! seed) return nil;
 
     NSMutableData *mpk = [NSMutableData secureData];
     UInt512 I;
-
+    
     HMAC(&I, SHA512, sizeof(UInt512), BIP32_SEED_KEY, strlen(BIP32_SEED_KEY), seed.bytes, seed.length);
 
     UInt256 secret = *(UInt256 *)&I, chain = *(UInt256 *)&I.u8[sizeof(UInt256)];
-
+    
     [mpk appendBytes:[BRKey keyWithSecret:secret compressed:YES].hash160.u32 length:4];
     
     CKDpriv(&secret, &chain, 0 | BIP32_HARD); // account 0H
-
+    
     [mpk appendBytes:&chain length:sizeof(chain)];
     [mpk appendData:[BRKey keyWithSecret:secret compressed:YES].publicKey];
 
+//    NSLog(@"TEST_BRBIP32Sequence.m(masterPublicKeyFromSeed)_mpk : %@", mpk); //t (masterPubKey == mpk)
     return mpk;
 }
 
 - (NSData *)publicKey:(uint32_t)n internal:(BOOL)internal masterPublicKey:(NSData *)masterPublicKey
 {
+//    NSLog(@"Call_BRBIP32Sequence.m Method(publicKey)"); //a
     if (masterPublicKey.length < 4 + sizeof(UInt256) + sizeof(BRECPoint)) return nil;
 
     UInt256 chain = *(const UInt256 *)((const uint8_t *)masterPublicKey.bytes + 4);
     BRECPoint pubKey = *(const BRECPoint *)((const uint8_t *)masterPublicKey.bytes + 36);
 
     CKDpub(&pubKey, &chain, internal ? 1 : 0); // internal or external chain
-    CKDpub(&pubKey, &chain, n); // nth key in chain
+    CKDpub(&pubKey, &chain, n); // nth key in chain PP
 
+//    NSLog(@"TEST_[NSData dataWithBytes:&pubKey length:sizeof(pubKey)] : %@", [NSData dataWithBytes:&pubKey length:sizeof(pubKey)]);
     return [NSData dataWithBytes:&pubKey length:sizeof(pubKey)];
 }
 
 - (NSString *)privateKey:(uint32_t)n internal:(BOOL)internal fromSeed:(NSData *)seed
 {
+//    NSLog(@"Call_BRBIP32Sequence.m Method(privateKey)"); //a
     return seed ? [self privateKeys:@[@(n)] internal:internal fromSeed:seed].lastObject : nil;
 }
 
 - (NSArray *)privateKeys:(NSArray *)n internal:(BOOL)internal fromSeed:(NSData *)seed
 {
+//    NSLog(@"Call_BRBIP32Sequence.m Method(privateKeys)"); //a
     if (! seed || ! n) return nil;
     if (n.count == 0) return @[];
 
@@ -209,34 +226,54 @@ static NSString *serialize(uint8_t depth, uint32_t fingerprint, uint32_t child, 
 
 - (NSString *)authPrivateKeyFromSeed:(NSData *)seed
 {
+//    NSLog(@"Call_BRBIP32Sequence.m Method(authPrivateKeyFromSeed)"); //a
     if (! seed) return nil;
     
     UInt512 I;
     
     HMAC(&I, SHA512, sizeof(UInt512), BIP32_SEED_KEY, strlen(BIP32_SEED_KEY), seed.bytes, seed.length);
+//    NSLog(@"TEST_BRBIP32Sequence.m(authPrivateKeyFromSeed)_[BIP32_SEED_KEY] : %s", BIP32_SEED_KEY); //t
+//    NSLog(@"TEST_BRBIP32Sequence.m(authPrivateKeyFromSeed)_[strlen+BIP32_SEED_KEY] : %lu", strlen(BIP32_SEED_KEY)); //t
     
     UInt256 secret = *(UInt256 *)&I, chain = *(UInt256 *)&I.u8[sizeof(UInt256)];
     uint8_t version = BITCOIN_PRIVKEY;
-    
+
 #if BITCOIN_TESTNET
     version = BITCOIN_PRIVKEY_TEST;
 #endif
-    
+    //t
     // path m/1H/0 (same as copay uses for bitauth)
+    /*
+    CKDpriv(&secret, &chain, 1 | BIP32_HARD);
+    CKDpriv(&secret, &chain, 0);
+    */
+//    CKDpriv(&secret, &chain, 44 | BIP32_HARD);
+//    CKDpriv(&secret, &chain, 99 | BIP32_HARD);
+//    CKDpriv(&secret, &chain, 0 | BIP32_HARD);
+
     CKDpriv(&secret, &chain, 1 | BIP32_HARD);
     CKDpriv(&secret, &chain, 0);
     
     NSMutableData *privKey = [NSMutableData secureDataWithCapacity:34];
-
+    
     [privKey appendBytes:&version length:1];
     [privKey appendBytes:&secret length:sizeof(secret)];
     [privKey appendBytes:"\x01" length:1]; // specifies compressed pubkey format
+
+//    NSLog(@"TEST_BRBIP32Sequence.m(authPrivateKeyFromSeed)_[NSString base58checkWithData:privKey1] : %@", privKey); //t // <b0e4cb65 66095a70 e5d310ab 2f170a75 dd3bdf80 bb8c34b9 e759cab5 4f447c82 e801>
+    
+//    NSLog(@"TEST_BRBIP32Sequence.m(authPrivateKeyFromSeed)_[NSString base58checkWithData:privKey2] : %@", [NSString base58checkWithData:privKey]); //t // TAiiw78fn7fAMiz7pi28LN8WrRdA1AcvnKyPsQSSuWCK924yivpa
+
+    /*
+    NSLog(@"TEST_base58 : %@", [NSString base58checkWithData:@"123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"]);
+    */
     return [NSString base58checkWithData:privKey];
 }
 
 // key used for BitID: https://github.com/bitid/bitid/blob/master/BIP_draft.md
 - (NSString *)bitIdPrivateKey:(uint32_t)n forURI:(NSString *)uri fromSeed:(NSData *)seed
 {
+//    NSLog(@"Call_BRBIP32Sequence.m Method(bitIdPrivateKey)"); //a
     NSUInteger len = [uri lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
     NSMutableData *data = [NSMutableData dataWithCapacity:sizeof(n) + len];
     
@@ -266,6 +303,7 @@ static NSString *serialize(uint8_t depth, uint32_t fingerprint, uint32_t child, 
     [privKey appendBytes:&version length:1];
     [privKey appendBytes:&secret length:sizeof(secret)];
     [privKey appendBytes:"\x01" length:1]; // specifies compressed pubkey format
+//    NSLog(@"TESTB_base58checkWithData:privKey : %@", [NSString base58checkWithData:privKey]); //t
     return [NSString base58checkWithData:privKey];
 }
 
@@ -273,6 +311,7 @@ static NSString *serialize(uint8_t depth, uint32_t fingerprint, uint32_t child, 
 
 - (NSString *)serializedPrivateMasterFromSeed:(NSData *)seed
 {
+//    NSLog(@"Call_BRBIP32Sequence.m Method(serializedPrivateMasterFromSeed)"); //a
     if (! seed) return nil;
 
     UInt512 I;
@@ -281,17 +320,24 @@ static NSString *serialize(uint8_t depth, uint32_t fingerprint, uint32_t child, 
 
     UInt256 secret = *(UInt256 *)&I, chain = *(UInt256 *)&I.u8[sizeof(UInt256)];
 
+//    NSLog(@"TEST_serializedPrivateMasterFromSeed : %@", serialize(0, 0, 0, chain, [NSData dataWithBytes:&secret length:sizeof(secret)])); //t
+    
     return serialize(0, 0, 0, chain, [NSData dataWithBytes:&secret length:sizeof(secret)]);
+    
+
 }
 
 - (NSString *)serializedMasterPublicKey:(NSData *)masterPublicKey
 {
+//    NSLog(@"Call_BRBIP32Sequence.m Method(serializedMasterPublicKey)"); //a
     if (masterPublicKey.length < 36) return nil;
     
     uint32_t fingerprint = CFSwapInt32BigToHost(*(const uint32_t *)masterPublicKey.bytes);
     UInt256 chain = *(UInt256 *)((const uint8_t *)masterPublicKey.bytes + 4);
     BRECPoint pubKey = *(BRECPoint *)((const uint8_t *)masterPublicKey.bytes + 36);
 
+//    NSLog(@"TEST_serializedMasterPublicKey : %@", serialize(1, fingerprint, 0 | BIP32_HARD, chain, [NSData dataWithBytes:&pubKey length:sizeof(pubKey)])); //t
+    
     return serialize(1, fingerprint, 0 | BIP32_HARD, chain, [NSData dataWithBytes:&pubKey length:sizeof(pubKey)]);
 }
 

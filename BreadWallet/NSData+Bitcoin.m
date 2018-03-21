@@ -1,10 +1,11 @@
 //
 //  NSData+Bitcoin.m
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 10/9/13.
 //  Copyright (c) 2013 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +28,7 @@
 #import "BRKey+BIP38.h"
 #import "NSData+Bitcoin.h"
 #import "NSString+Bitcoin.h"
+
 
 // bitwise left rotation
 #define rol32(a, b) (((a) << (b)) | ((a) >> (32 - (b))))
@@ -51,6 +53,8 @@ static void SHA1Compress(uint32_t *r, uint32_t *x)
     for (; i < 80; i++) sha1(f2(b, c, d), 0xca62c1d6, (x[i] = rol32(x[i - 3] ^ x[i - 8] ^ x[i - 14] ^ x[i - 16], 1)));
 
     r[0] += a, r[1] += b, r[2] += c, r[3] += d, r[4] += e;
+    
+    // NSLog(@"CALL_NSData+Bitcoin.m_SHA1Compress"); //a
 }
 
 void SHA1(void *md, const void *data, size_t len)
@@ -70,6 +74,8 @@ void SHA1(void *md, const void *data, size_t len)
     *(uint64_t *)&x[14] = CFSwapInt64HostToBig((uint64_t)len*8); // append length in bits
     SHA1Compress(buf, x); // finalize
     for (i = 0; i < 5; i++) ((uint32_t *)md)[i] = CFSwapInt32HostToBig(buf[i]); // write to md
+    
+    // NSLog(@"CALL_NSData+Bitcoin.m_SHA1"); //a
 }
 
 // bitwise right rotation
@@ -111,6 +117,8 @@ static void SHA256Compress(uint32_t *r, uint32_t *x)
     }
     
     r[0] += a, r[1] += b, r[2] += c, r[3] += d, r[4] += e, r[5] += f, r[6] += g, r[7] += h;
+    
+    // NSLog(@"CALL_NSData+Bitcoin.m_SHA256Compress"); //a
 }
 
 void SHA256(void *md, const void *data, size_t len)
@@ -131,6 +139,8 @@ void SHA256(void *md, const void *data, size_t len)
     *(uint64_t *)&x[14] = CFSwapInt64HostToBig((uint64_t)len*8); // append length in bits
     SHA256Compress(buf, x); // finalize
     for (i = 0; i < 8; i++) ((uint32_t *)md)[i] = CFSwapInt32HostToBig(buf[i]); // write to md
+    
+    // NSLog(@"CALL_NSData+Bitcoin.m_SHA256"); //a
 }
 
 // bitwise right rotation
@@ -176,6 +186,8 @@ static void SHA512Compress(uint64_t *r, uint64_t *x)
     }
     
     r[0] += a, r[1] += b, r[2] += c, r[3] += d, r[4] += e, r[5] += f, r[6] += g, r[7] += h;
+    
+    // NSLog(@"CALL_NSData+Bitcoin.m_SHA512Compress"); //a
 }
 
 void SHA512(void *md, const void *data, size_t len)
@@ -196,6 +208,8 @@ void SHA512(void *md, const void *data, size_t len)
     x[14] = 0, x[15] = CFSwapInt64HostToBig((uint64_t)len*8); // append length in bits
     SHA512Compress(buf, x); // finalize
     for (i = 0; i < 8; i++) ((uint64_t *)md)[i] = CFSwapInt64HostToBig(buf[i]); // write to md
+
+    // NSLog(@"CALL_NSData+Bitcoin.m_SHA512"); //a
 }
 
 // basic ripemd functions
@@ -252,6 +266,8 @@ static void RMDCompress(uint32_t *r, uint32_t *x)
     
     t = r[1] + cl + dr; // final result for r[0]
     r[1] = r[2] + dl + er, r[2] = r[3] + el + ar, r[3] = r[4] + al + br, r[4] = r[0] + bl + cr, r[0] = t; // combine
+    
+    // NSLog(@"CALL_NSData+Bitcoin.m_SHA512"); //a
 }
 
 // ripemd-160 hash function: http://homes.esat.kuleuven.be/~bosselae/ripemd160.html
@@ -272,6 +288,8 @@ void RMD160(void *md, const void *data, size_t len)
     *(uint64_t *)&x[14] = CFSwapInt64HostToLittle((uint64_t)len*8); // append length in bits
     RMDCompress(buf, x); // finalize
     for (i = 0; i < 5; i++) ((uint32_t *)md)[i] = CFSwapInt32HostToLittle(buf[i]); // write to md
+    
+    // NSLog(@"CALL_NSData+Bitcoin.m_RMD160"); //a
 }
 
 // basic md5 functions
@@ -309,6 +327,8 @@ static void MD5Compress(uint32_t *r, uint32_t *x)
     
     r[0] += a, r[1] += b, r[2] += c, r[3] += d;
     a = b = c = d = t = 0;
+    
+    // NSLog(@"CALL_NSData+Bitcoin.m_MD5Compress"); //a
 }
 
 // md5 - for non-cyptographic use only
@@ -331,6 +351,8 @@ void MD5(void *md, const void *data, size_t len)
     for (i = 0; i < 4; i++) ((uint32_t *)md)[i] = CFSwapInt32HostToLittle(buf[i]); // write to md
     memset(x, 0, sizeof(x));
     memset(buf, 0, sizeof(buf));
+    
+    // NSLog(@"CALL_NSData+Bitcoin.m_MD5"); //a
 }
 
 // HMAC(key, data) = hash((key xor opad) || hash((key xor ipad) || data))
@@ -356,6 +378,8 @@ void HMAC(void *md, void (*hash)(void *, const void *, size_t), size_t hlen, con
     memset(k, 0, sizeof(k));
     memset(kipad, 0, blen);
     memset(kopad, 0, blen);
+    
+    //NSLog(@"CALL_NSData+Bitcoin.m_HMAC"); //a
 }
 
 // dk = T1 || T2 || ... || Tdklen/hlen
@@ -389,6 +413,8 @@ void PBKDF2(void *dk, size_t dklen, void (*hash)(void *, const void *, size_t), 
     memset(s, 0, sizeof(s));
     memset(U, 0, sizeof(U));
     memset(T, 0, sizeof(T));
+    
+    // NSLog(@"CALL_NSData+Bitcoin.m_PBKDF2"); //a
 }
 
 #define le32(x) CFSwapInt32HostToLittle(x)
@@ -459,6 +485,8 @@ static void _poly1305Compress(uint32_t h[5], const void *key32, const void *data
     
     d0 = d1 = d2 = d3 = d4 = 0;
     x[0] = x[1] = x[2] = x[3] = b = t0 = t1 = t2 = t3 = t4 = r0 = r1 = r2 = r3 = r4 = 0;
+    
+    // NSLog(@"CALL_NSData+Bitcoin.m_ _poly1305Compress"); //a
 }
 
 // poly1305 authenticator: https://tools.ietf.org/html/rfc7539
@@ -474,6 +502,8 @@ void poly1305(void *mac16, const void *key32, const void *data, size_t len)
     _poly1305Compress(h, key32, data, len, 1);
     memcpy(mac16, h, 16);
     h[0] = h[1] = h[2] = h[3] = h[4] = 0;
+    
+    // NSLog(@"CALL_NSData+Bitcoin.m_poly1305"); //a
 }
 
 // basic chacha quarter round operation
@@ -524,12 +554,16 @@ void chacha20(void *out, const void *key32, const void *iv8, const void *data, s
     x0 = x1 = x2 = x3 = x4 = x5 = x6 = x7 = x8 = x9 = x10 = x11 = x12 = x13 = x14 = x15 = 0;
     memset(s, 0, sizeof(s));
     memset(b, 0, sizeof(b));
+    
+    // NSLog(@"CALL_NSData+Bitcoin.m_chacha20"); //a
 }
 
 // chacha20-poly1305 authenticated encryption with associated data (AEAD): https://tools.ietf.org/html/rfc7539
 size_t chacha20Poly1305AEADEncrypt(void *out, size_t outLen, const void *key32, const void *nonce12,
                                    const void *data, size_t dataLen, const void *ad, size_t adLen)
 {
+    NSLog(@"CALL_NSData+Bitcoin.m_chacha20Poly1305AEADEncrypt"); //a
+    
     const void *iv = (const uint8_t *)nonce12 + 4;
     uint64_t counter = 0, macKey[4] = { 0, 0, 0, 0 }, pad[2] = { 0, 0 };
     uint32_t h[5] = { 0, 0, 0, 0, 0 };
@@ -564,6 +598,8 @@ size_t chacha20Poly1305AEADEncrypt(void *out, size_t outLen, const void *key32, 
 size_t chacha20Poly1305AEADDecrypt(void *out, size_t outLen, const void *key32, const void *nonce12,
                                      const void *data, size_t dataLen, const void *ad, size_t adLen)
 {
+    // NSLog(@"CALL_NSData+Bitcoin.m_chacha20Poly1305AEADDecrypt"); //a
+    
     const void *iv = (const uint8_t *)nonce12 + 4;
     uint64_t counter = 0, macKey[4] = { 0, 0, 0, 0 }, pad[2] = { 0, 0 };
     uint32_t h[5] = { 0, 0, 0, 0, 0 }, mac[4];
@@ -601,26 +637,36 @@ size_t chacha20Poly1305AEADDecrypt(void *out, size_t outLen, const void *key32, 
 
 + (instancetype)dataWithUInt256:(UInt256)n
 {
+    NSLog(@"CALL_NSData+Bitcoin.m_ @implementation NSData = dataWithUInt256"); //a
+    
     return [NSData dataWithBytes:&n length:sizeof(n)];
 }
 
 + (instancetype)dataWithUInt160:(UInt160)n
 {
+    NSLog(@"CALL_NSData+Bitcoin.m_ @implementation NSData = dataWithUInt160"); //a
+    
     return [NSData dataWithBytes:&n length:sizeof(n)];
 }
 
 + (instancetype)dataWithUInt128:(UInt128)n
 {
+    NSLog(@"CALL_NSData+Bitcoin.m_ @implementation NSData = dataWithUInt128"); //a
+    
     return [NSData dataWithBytes:&n length:sizeof(n)];
 }
 
 + (instancetype)dataWithBase58String:(NSString *)b58str
 {
+    NSLog(@"CALL_NSData+Bitcoin.m_ @implementation NSData = dataWithBase58String"); //a
+    
     return b58str.base58ToData;
 }
 
 - (UInt160)SHA1
 {
+    NSLog(@"CALL_NSData+Bitcoin.m_ @implementation NSData = SHA1"); //a
+    
     UInt160 sha1;
 
     SHA1(&sha1, self.bytes, self.length);

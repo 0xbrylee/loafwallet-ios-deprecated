@@ -1,10 +1,11 @@
 //
 //  BRHTTPRouter.swift
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Samuel Sutch on 2/8/16.
 //  Copyright (c) 2016 breadwallet LLC
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -102,7 +103,7 @@ public typealias BRHTTPRoute = (_ request: BRHTTPRequest, _ match: BRHTTPRouteMa
                 var match = BRHTTPRouteMatch()
                 for i in 1..<m.numberOfRanges {
                     let key = captureGroups[i-1]!
-                    let captured = (p as NSString).substring(with: m.rangeAt(i))
+                    let captured = (p as NSString).substring(with: m.range(at: i))
                     if match[key] == nil {
                         match[key] = [captured]
                     } else {

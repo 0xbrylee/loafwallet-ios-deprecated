@@ -1,10 +1,11 @@
 //
 //  BRRootViewController.m
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 9/15/13.
 //  Copyright (c) 2013 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -47,9 +48,11 @@
 #import <sys/stat.h>
 #import <mach-o/dyld.h>
 
-#define BALANCE_TIP NSLocalizedString(@"This is your bitcoin balance. Bitcoin is a currency. "\
+#import "BRWelcomeViewController.h"
+
+#define BALANCE_TIP NSLocalizedString(@"This is your toscoin balance. toscoin is a currency. "\
                                        "The exchange rate changes with the market.", nil)
-#define BITS_TIP    NSLocalizedString(@"%@ is for 'bits'. %@ = 1 bitcoin.", nil)
+#define BITS_TIP    NSLocalizedString(@"%@ is for 'tos'. %@ = 1 toscoin.", nil)
 
 #define BACKUP_DIALOG_TIME_KEY @"BACKUP_DIALOG_TIME"
 #define BALANCE_KEY            @"BALANCE"
@@ -83,6 +86,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
     
     // Do any additional setup after loading the view.
 
@@ -198,7 +202,7 @@
                 [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"WARNING", nil)
                   message:NSLocalizedString(@"DEVICE SECURITY COMPROMISED\n"
                                             "Any 'jailbreak' app can access any other app's keychain data "
-                                            "(and steal your bitcoins). "
+                                            "(and steal your toscoins). "
                                             "Wipe this wallet immediately and restore on a secure device.", nil)
                  delegate:self cancelButtonTitle:NSLocalizedString(@"ignore", nil)
                  otherButtonTitles:NSLocalizedString(@"wipe", nil), nil] show];
@@ -207,7 +211,7 @@
                 [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"WARNING", nil)
                   message:NSLocalizedString(@"DEVICE SECURITY COMPROMISED\n"
                                             "Any 'jailbreak' app can access any other app's keychain data "
-                                            "(and steal your bitcoins).", nil)
+                                            "(and steal your toscoins).", nil)
                   delegate:self cancelButtonTitle:NSLocalizedString(@"ignore", nil)
                   otherButtonTitles:NSLocalizedString(@"close app", nil), nil] show];
             }
@@ -277,6 +281,8 @@
             [self showBackupDialogIfNeeded];
             [self.receiveViewController updateAddress];
             self.balance = manager.wallet.balance;
+            
+            NSLog(@"self.balance1 :%llu",self.balance);
         }];
 
     self.seedObserver =
@@ -284,6 +290,8 @@
         queue:nil usingBlock:^(NSNotification *note) {
             [self.receiveViewController updateAddress];
             self.balance = manager.wallet.balance;
+            NSLog(@"self.balance2 :%llu",self.balance);
+
         }];
 
     self.syncStartedObserver =
@@ -304,6 +312,8 @@
             if (! manager.didAuthenticate) self.navigationItem.titleView = self.logo;
             [self.receiveViewController updateAddress];
             self.balance = manager.wallet.balance;
+            NSLog(@"self.balance3 :%llu",self.balance);
+
         }];
     
     self.syncFailedObserver =
@@ -399,6 +409,7 @@
 {
     self.didAppear = YES;
     
+    
     if (! self.navBarTap) {
         self.navBarTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(navBarTap:)];
         [self.navigationController.navigationBar addGestureRecognizer:self.navBarTap];
@@ -415,7 +426,7 @@
     if ([UIApplication sharedApplication].protectedDataAvailable) {
         [self performSelector:@selector(protectedViewDidAppear) withObject:nil afterDelay:0.0];
     }
-    
+
     [super viewDidAppear:animated];
 }
 
@@ -538,7 +549,7 @@
         [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"WARNING", nil)
           message:[NSString stringWithFormat:@"\n%@\n\n%@\n\n%@\n",
                    [NSLocalizedString(@"\nDO NOT let anyone see your recovery\n"
-                                      "phrase or they can spend your bitcoins.\n", nil)
+                                      "phrase or they can spend your toscoins.\n", nil)
                     stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]],
                    [NSLocalizedString(@"\nNEVER type your recovery phrase into\n"
                                       "password managers or elsewhere.\n"
@@ -598,7 +609,7 @@
     [[NSUserDefaults standardUserDefaults] setDouble:balance forKey:BALANCE_KEY];
 
     if (self.percent.hidden) {
-        self.navigationItem.title = [NSString stringWithFormat:@"%@  LTC", [manager stringForAmount:balance]];
+        self.navigationItem.title = [NSString stringWithFormat:@"%@  TOS", [manager stringForAmount:balance]];
     }
 }
 
@@ -778,7 +789,7 @@
     [defs setDouble:now forKey:BACKUP_DIALOG_TIME_KEY];
     
     [[[UIAlertView alloc]
-      initWithTitle:(first) ? NSLocalizedString(@"you received bitcoin!", nil) : NSLocalizedString(@"IMPORTANT", nil)
+      initWithTitle:(first) ? NSLocalizedString(@"you received toscoin!", nil) : NSLocalizedString(@"IMPORTANT", nil)
       message:[NSString stringWithFormat:NSLocalizedString(@"\n%@\n\nif you ever lose your phone, you will need it to "
                                                            "recover your wallet", nil),
                (first) ? NSLocalizedString(@"next, write down your recovery phrase", nil) :
@@ -1026,6 +1037,7 @@ viewControllerAfterViewController:(UIViewController *)viewController
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
+    NSLog(@"TEST_Wipe2"); //t
     if (buttonIndex == alertView.cancelButtonIndex) return;
 
     if ([[alertView buttonTitleAtIndex:buttonIndex] isEqual:NSLocalizedString(@"close app", nil)]) exit(0);

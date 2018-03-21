@@ -1,10 +1,11 @@
 //
 //  BRSeedViewController.m
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 6/12/13.
 //  Copyright (c) 2013 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +31,7 @@
 #import "NSMutableData+Bitcoin.h"
 #import "BREventManager.h"
 #import "BRTutorial.h"
+#import "BRBubbleView.h"
 
 #define LABEL_MARGIN       20.0
 #define WRITE_TOGGLE_DELAY 15.0
@@ -90,17 +92,59 @@ int tapCount = 0;
     return [self customInit];
 }
 
+- (IBAction)copy:(id)sender
+{
+    UIActionSheet *actionSheet = [UIActionSheet new];
+    
+    actionSheet.title = [NSString stringWithFormat:NSLocalizedString(@"copy phrase to clipboard", nil)];
+    actionSheet.delegate = self;
+    [actionSheet addButtonWithTitle:NSLocalizedString(@"copy phrase to clipboard", nil)];
+    [actionSheet addButtonWithTitle:NSLocalizedString(@"cancel", nil)];
+    actionSheet.cancelButtonIndex = actionSheet.numberOfButtons - 1;
+    
+    [actionSheet showInView:[UIApplication sharedApplication].keyWindow];
+}
+
+// MARK: - UIActionSheetDelegate
+
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    NSString *title = [actionSheet buttonTitleAtIndex:buttonIndex];
+    
+    //TODO: allow user to create a payment protocol request object, and use merge avoidance techniques:
+    // https://medium.com/@octskyward/merge-avoidance-7f95a386692f
+    
+    if ([title isEqual:NSLocalizedString(@"copy phrase to clipboard", nil)]) {
+        [UIPasteboard generalPasteboard].string = self.seedLabel.text;
+        
+        NSLog(@"\n\nCOPIED phrase:\n\n%@", [UIPasteboard generalPasteboard].string);
+        
+        [self.view addSubview:[[[BRBubbleView viewWithText:NSLocalizedString(@"copied", nil)
+                                                    center:CGPointMake(self.view.bounds.size.width/2.0, self.view.bounds.size.height/2.0 - 130.0)] popIn]
+                               popOutAfterDelay:2.0]];
+    }
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     
     NSUserDefaults *defs = [NSUserDefaults standardUserDefaults];
     
+    self.copyedButton.hidden = NO;
+
     if (! [defs boolForKey:WALLET_NEEDS_BACKUP_KEY]) {
         self.continueButton.hidden = YES;
     } else if ([defs boolForKey:WALLET_NEEDS_BACKUP_KEY]) {
         self.continueButton.hidden = NO;
     }
+    
+    BOOL isRecoverMenu = [[NSUserDefaults standardUserDefaults] boolForKey:@DF_IS_RECOVER_MENU];
+    if (isRecoverMenu) {
+        self.continueButton.hidden = YES;
+    }
+    
+    self.copyedButton.frame = self.seedLabel.frame;
     // Do any additional setup after loading the view.
     
     self.tutorialView.hidden = YES;
@@ -112,11 +156,13 @@ int tapCount = 0;
     
     if (self.navigationController.viewControllers.firstObject != self) {
         self.wallpaper.hidden = YES;
-        self.view.backgroundColor = [UIColor clearColor];
+//        self.view.backgroundColor = [UIColor redColor];
     }
     
+    
+    
     self.titleLabel.text = NSLocalizedString(@"Pay", nil);
-    self.descriptionLabel.text = NSLocalizedString(@"Easily send Litecoin anywhere in the world with LoafWallet's live currency conversion rates, and QR scanner for quick on-the-go payments.", nil);
+    self.descriptionLabel.text = NSLocalizedString(@"Easily send TosCoin anywhere in the world with TosWallet's live currency conversion rates, and QR scanner for quick on-the-go payments.", nil);
     
     [self.progessButton addTarget:self action:@selector(tap) forControlEvents:UIControlEventTouchUpInside];
     
@@ -163,6 +209,7 @@ int tapCount = 0;
     [UIView animateWithDuration:0.1 animations:^{
         self.seedLabel.alpha = 1.0;
     }];
+    tapCount = 0;
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -230,14 +277,22 @@ int tapCount = 0;
 {
     tapCount += 1;
     
+    NSLog(@"tapCount :%d",tapCount);
+    
     if (tapCount == 1) {
 
+        self.bgImageView.image = [UIImage imageNamed:@"create_receive_bg"];
+        self.bgImageView.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y, self.view.frame.size.width, self.view.frame.size.height);
+        
         self.titleLabel.text = NSLocalizedString(@"Receive", nil);
-        self.descriptionLabel.text = NSLocalizedString(@"Receive Litecoins with your receive address. Share you Litecoin Address with others, and request a payment. Your Litecoin address can be copied to your clipboard, sent via email and shared via other forms of social media.", nil);
+        self.descriptionLabel.text = NSLocalizedString(@"Receive Toscoins with your receive address. Share you Toscoin Address with others, and request a payment. Your Toscoin address can be copied to your clipboard, sent via email and shared via other forms of social media.", nil);
     } else if (tapCount == 2) {
 
+        self.bgImageView.image = [UIImage imageNamed:@"create_history_bg"];
+        self.bgImageView.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y, self.view.frame.size.width, self.view.frame.size.height);
+
         self.titleLabel.text = NSLocalizedString(@"History", nil);
-        self.descriptionLabel.text = NSLocalizedString(@"Browse through your transaction history, secured with your passcode. This is not visible to others, unless they possess your LoafWallet passcode. Find indepth details about every transaction.", nil);
+        self.descriptionLabel.text = NSLocalizedString(@"Browse through your transaction history, secured with your passcode. This is not visible to others, unless they possess your TosWallet passcode. Find indepth details about every transaction.", nil);
         [self.progessButton setTitle:@"→" forState:UIControlStateNormal];
     } else if (tapCount == 3) {
         
@@ -253,7 +308,7 @@ int tapCount = 0;
         
         [defs synchronize];
         
-        [BREventManager saveEvent:@"seed:dismiss"];
+            [BREventManager saveEvent:@"seed:dismiss"];
         if (self.navigationController.viewControllers.firstObject != self) return;
         
         self.navigationController.presentingViewController.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
@@ -267,6 +322,7 @@ int tapCount = 0;
 - (IBAction)done:(id)sender
 {
     self.tutorialView.hidden = NO;
+    self.copyedButton.hidden = YES;
 }
 
 @end

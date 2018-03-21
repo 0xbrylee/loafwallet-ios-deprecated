@@ -1,10 +1,11 @@
 //
 //  BRReceiveViewController.m
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 5/8/13.
 //  Copyright (c) 2013 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -36,9 +37,9 @@
 #import "BREventManager.h"
 #import <MobileCoreServices/UTCoreTypes.h>
 
-#define QR_TIP      NSLocalizedString(@"Let others scan this QR code to get your bitcoin address. Anyone can send "\
-                    "bitcoins to your wallet by transferring them to your address.", nil)
-#define ADDRESS_TIP NSLocalizedString(@"This is your bitcoin address. Tap to copy it or send it by email or sms. The "\
+#define QR_TIP      NSLocalizedString(@"Let others scan this QR code to get your toscoin address. Anyone can send "\
+                    "toscoins to your wallet by transferring them to your address.", nil)
+#define ADDRESS_TIP NSLocalizedString(@"This is your toscoin address. Tap to copy it or send it by email or sms. The "\
                     "address will change each time you receive funds, but old addresses always work.", nil)
 
 #define QR_IMAGE_FILE [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject\
@@ -69,7 +70,7 @@
     self.receiveButton.layer.borderWidth = 2;
     self.receiveButton.layer.borderColor = (__bridge CGColorRef _Nullable)([UIColor colorWithRed:40.0 green:40.0 blue:40.0 alpha:0.90]);
     self.receiveButton.clipsToBounds = YES;
-    [self.receiveButton setTitle:NSLocalizedString(@"Receive", nil) forState:UIControlStateNormal];
+//    [self.receiveButton setTitle:NSLocalizedString(@"Receive", nil) forState:UIControlStateNormal];
 
     BRWalletManager *manager = [BRWalletManager sharedInstance];
     BRPaymentRequest *req;
@@ -264,7 +265,7 @@
     BOOL req = (_paymentRequest) ? YES : NO;
     UIActionSheet *actionSheet = [UIActionSheet new];
 
-    actionSheet.title = [NSString stringWithFormat:NSLocalizedString(@"Receive bitcoins at this address: %@", nil),
+    actionSheet.title = [NSString stringWithFormat:NSLocalizedString(@"Receive TosCoins at this address: %@", nil),
                self.paymentAddress];
     actionSheet.delegate = self;
     [actionSheet addButtonWithTitle:(req) ? NSLocalizedString(@"copy request to clipboard", nil) :
@@ -302,6 +303,7 @@
         [title isEqual:NSLocalizedString(@"copy request to clipboard", nil)]) {
         [UIPasteboard generalPasteboard].string = (self.paymentRequest.amount > 0) ? self.paymentRequest.string :
                                                   self.paymentAddress;
+        
         NSLog(@"\n\nCOPIED PAYMENT REQUEST/ADDRESS:\n\n%@", [UIPasteboard generalPasteboard].string);
 
         [self.view addSubview:[[[BRBubbleView viewWithText:NSLocalizedString(@"copied", nil)
@@ -317,7 +319,7 @@
         if ([MFMailComposeViewController canSendMail]) {
             MFMailComposeViewController *composeController = [MFMailComposeViewController new];
             
-            composeController.subject = NSLocalizedString(@"Bitcoin address", nil);
+            composeController.subject = NSLocalizedString(@"TosCoin address", nil);
             [composeController setMessageBody:self.paymentRequest.string isHTML:NO];
             [composeController addAttachmentData:UIImagePNGRepresentation(self.qrView.image) mimeType:@"image/png"
              fileName:@"qr.png"];
@@ -339,7 +341,7 @@
             MFMessageComposeViewController *composeController = [MFMessageComposeViewController new];
 
             if ([MFMessageComposeViewController canSendSubject]) {
-                composeController.subject = NSLocalizedString(@"Bitcoin address", nil);
+                composeController.subject = NSLocalizedString(@"TosCoin address", nil);
             }
             
             composeController.body = self.paymentRequest.string;
@@ -395,7 +397,7 @@ error:(NSError *)error
     
     if (amount < manager.wallet.minOutputAmount) {
         [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"amount too small", nil)
-          message:[NSString stringWithFormat:NSLocalizedString(@"bitcoin payments can't be less than %@", nil),
+          message:[NSString stringWithFormat:NSLocalizedString(@"toscoin payments can't be less than %@", nil),
                    [manager stringForAmount:manager.wallet.minOutputAmount]]
           delegate:nil cancelButtonTitle:NSLocalizedString(@"ok", nil) otherButtonTitles:nil] show];
         [BREventManager saveEvent:@"receive:amount_too_small"];
@@ -409,6 +411,8 @@ error:(NSError *)error
     
     receiveController.paymentRequest = self.paymentRequest;
     receiveController.paymentRequest.amount = amount;
+    
+    
     receiveController.view.backgroundColor = self.parentViewController.parentViewController.view.backgroundColor;
     navController.delegate = receiveController;
     [navController pushViewController:receiveController animated:YES];

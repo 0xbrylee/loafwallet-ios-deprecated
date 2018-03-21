@@ -1,10 +1,11 @@
 //
 //  BRAppGroupConstants.h
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Henry Tsai on 6/13/15.
 //  Copyright (c) 2015 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +25,6 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-#define APP_GROUP_ID                  @"group.com.litecoin.loafwallet"
+#define APP_GROUP_ID                  @"com.blockware.toswallet"
 #define APP_GROUP_REQUEST_DATA_KEY    @"kBRSharedContainerDataWalletRequestDataKey"
 #define APP_GROUP_RECEIVE_ADDRESS_KEY @"kBRSharedContainerDataWalletReceiveAddressKey"

@@ -1,6 +1,6 @@
 //
 //  BRAWWatchDataManager.swift
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Henry on 10/27/15.
 //  Copyright (c) 2015 Aaron Voisine <voisine@gmail.com>
@@ -184,7 +184,7 @@ class BRAWWatchDataManager: NSObject, WCSessionDelegate {
     
     func balanceAttributedString() -> NSAttributedString? {
        if let originalBalanceString = BRAWWatchDataManager.sharedInstance.balance {
-            var balanceString = originalBalanceString.replacingOccurrences(of: "Ł", with: "")
+            var balanceString = originalBalanceString.replacingOccurrences(of: "Ŧ", with: "")
             balanceString = balanceString.trimmingCharacters(in: CharacterSet.whitespaces)
             return attributedStringForBalance(balanceString)
         }
@@ -195,7 +195,7 @@ class BRAWWatchDataManager: NSObject, WCSessionDelegate {
         let attributedString = NSMutableAttributedString()
         
         attributedString.append(
-            NSAttributedString(string: "Ł", attributes: [NSForegroundColorAttributeName : UIColor.gray]))
+            NSAttributedString(string: "Ŧ", attributes: [NSForegroundColorAttributeName : UIColor.gray]))
         
         attributedString.append(
             NSAttributedString(string: balance ?? "0", attributes:

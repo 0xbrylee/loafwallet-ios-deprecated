@@ -1,6 +1,6 @@
 //
 //  BRReplicatedKVStore.swift
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Samuel Sutch on 8/10/16.
 //  Copyright © 2016 breadwallet LLC. All rights reserved.
@@ -721,9 +721,13 @@ open class BRReplicatedKVStore: NSObject {
     fileprivate func checkErr(_ e: Int32, s: String, r: Int32 = SQLITE_NULL) throws {
         if (r == SQLITE_NULL && (e != SQLITE_OK && e != SQLITE_DONE && e != SQLITE_ROW))
             && (e != SQLITE_NULL && e != r) {
-            let es = NSString(cString: sqlite3_errstr(e), encoding: String.Encoding.utf8.rawValue)
+            if #available(iOS 8.2, *) {
+                let es = NSString(cString: sqlite3_errstr(e), encoding: String.Encoding.utf8.rawValue)
+            } else {
+                // Fallback on earlier versions
+            }
             let em = NSString(cString: sqlite3_errmsg(db), encoding: String.Encoding.utf8.rawValue)
-            log("\(s): errcode=\(e) errstr=\(String(describing: es)) errmsg=\(String(describing: em))")
+//            log("\(s): errcode=\(e) errstr=\(String(describing: es)) errmsg=\(String(describing: em))")
             throw BRReplicatedKVStoreError.sqLiteError
         }
     }

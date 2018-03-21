@@ -1,10 +1,11 @@
 //
 //  NSMutableData+Bitcoin.h
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 5/20/13.
 //  Copyright (c) 2013 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +30,7 @@
 #if BITCOIN_TESTNET
 #define BITCOIN_MAGIC_NUMBER 0xf1c8d2fdu
 #else
-#define BITCOIN_MAGIC_NUMBER 0xdbb6c0fbu
+#define BITCOIN_MAGIC_NUMBER 0xebafced8u
 #endif
 
 CF_IMPLICIT_BRIDGING_ENABLED

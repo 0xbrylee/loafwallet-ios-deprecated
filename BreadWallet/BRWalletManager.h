@@ -1,10 +1,11 @@
 //
 //  BRWalletManager.h
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 3/2/14.
 //  Copyright (c) 2014 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,8 +30,8 @@
 #import "BRWallet.h"
 #import "BRMnemonic.h"
 
-#define BTC          @"\xC5\x81"     // uppercase Ł with stroke (utf-8)
-#define BITS         @"\xC5\x81"     // uppercase Ł with stroke (utf-8)
+#define BTC          @"\xC5\xA6"     // uppercase Ŧ with stroke (utf-8)
+#define BITS         @"\xC5\xA6"     // uppercase Ŧ with stroke (utf-8)
 #define NARROW_NBSP  @"\xE2\x80\xAF" // narrow no-break space (utf-8)
 #define LDQUOTE      @"\xE2\x80\x9C" // left double quote (utf-8)
 #define RDQUOTE      @"\xE2\x80\x9D" // right double quote (utf-8)

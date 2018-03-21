@@ -1,10 +1,11 @@
 //
 //  BRAppDelegate.m
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 5/8/13.
 //  Copyright (c) 2013 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -41,6 +42,13 @@
 #pragma message "snapshot build"
 #endif
 
+#define  DF_ALERT_TAG_VERSION_CHECK_FALSE 998
+#define  DF_ALERT_TAG_VERSION_CHECK_TRUE 999
+
+#define DF_VER_CHECK_URL "http://toswallet.tosblock.com/api/v1/update"
+
+#define SECURE_TIME_KEY         @"SECURE_TIME"
+
 @interface BRAppDelegate () <PKPushRegistryDelegate>
 
 // the nsnotificationcenter observer for wallet balance
@@ -58,7 +66,17 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Override point for customization after application launch.
+    
+    [[UINavigationBar appearance] setBackgroundImage:[UIImage imageNamed:@"navigation"] forBarMetrics:UIBarMetricsDefault];
+    [UINavigationBar appearance].tintColor = [UIColor whiteColor];
+    
+    [[NSUserDefaults standardUserDefaults] setBool:FALSE forKey:@DF_IS_RECOVER_MENU];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 
+//     [UINavigationBar appearance].backgroundColor = [UIColor redColor] ;
+    //서버에서 최신 버전데이터 가져오기
+    [self checkVersion];
+    
     // use background fetch to stay synced with the blockchain
     [[UIApplication sharedApplication] setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalMinimum];
 
@@ -99,7 +117,85 @@
     // observe balance and create notifications
     [self setupBalanceNotification:application];
     [self setupPreferenceDefaults];
+    
     return YES;
+}
+
+- (void) checkVersion{
+    //x5-z8300
+    NSString* appVersion = [NSString stringWithFormat:@"%@",[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
+    
+    NSURL *authURL = [NSURL URLWithString:[NSString stringWithFormat:@"%s",DF_VER_CHECK_URL]];
+    NSMutableURLRequest *req = [[NSMutableURLRequest alloc] initWithURL:authURL];
+    
+    [req setHTTPMethod:@"GET"];
+    
+    NSURLResponse *res;
+    NSError *err;
+    NSData *d = [NSURLConnection sendSynchronousRequest:req returningResponse:&res error:&err];
+    
+    NSString *data = [[NSString alloc] initWithData:d encoding:NSUTF8StringEncoding];
+    NSDictionary *returnMessage = [NSJSONSerialization JSONObjectWithData: [data dataUsingEncoding:NSUTF8StringEncoding]options: NSJSONReadingMutableContainers error:&err];
+    NSLog(@"serverData %@", d);
+    if (!err) {
+        NSLog(@"data :%@",data);
+        /*
+         "version": "1.2.3",
+         "description": "latest version of iOS toswallet.",
+         "forceUpdate": "false",
+         "notifyMe1ssage": "TEST 테스트 1234\n테스트",
+         "updateURL": "toswallet.tosblock.com/downloads/latest/"
+         */
+        //DF_UPDATE_URL
+        NSString * receiveVersion = [returnMessage objectForKey:@"version"];
+        NSString * isForceUpdate = [returnMessage objectForKey:@"forceUpdate"];
+        NSString * updateURL = [returnMessage objectForKey:@"updateURL"];
+        
+        [[NSUserDefaults standardUserDefaults] setObject:updateURL forKey:@DF_UPDATE_URL];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        
+        //현재 앱버전과 서버 버전이 틀리면
+        //즉 최신버전이 아니면
+        if ([appVersion isEqualToString:receiveVersion] == FALSE) {
+            if ([isForceUpdate isEqualToString:@"false"] == TRUE) {
+                [self showAlertForceUpdateFalse:returnMessage];
+            }else{
+                [self showAlertForceUpdateTrue:returnMessage];
+            }
+        }
+    } else {
+        NSLog(@"Error occurred. %@", err);
+    }
+}
+- (void) showAlertForceUpdateFalse:(NSDictionary*)dic{
+    
+    NSString *strTitle = [NSString stringWithFormat:@"%@",[dic objectForKey:@"notifyMessage"]];
+    
+    if (strTitle.length > 0
+        || ![strTitle isEqualToString:@"null"]
+        || ![strTitle isEqualToString:@"NULL"]
+        ) {
+        
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Notice" message:[dic objectForKey:@"notifyMessage"] delegate:self cancelButtonTitle:@"Later" otherButtonTitles:@"Update", nil];
+        alertView.tag = DF_ALERT_TAG_VERSION_CHECK_FALSE;
+        [alertView show];
+    }
+}
+
+- (void) showAlertForceUpdateTrue:(NSDictionary*)dic{
+    
+    NSString *strTitle = [NSString stringWithFormat:@"%@",[dic objectForKey:@"notifyMessage"]];
+    
+    if (strTitle.length > 0
+        || ![strTitle isEqualToString:@"null"]
+        || ![strTitle isEqualToString:@"NULL"]
+        ) {
+        
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Notice" message:[dic objectForKey:@"notifyMessage"]
+                                                           delegate:self cancelButtonTitle:nil otherButtonTitles:@"Update", nil];
+        alertView.tag = DF_ALERT_TAG_VERSION_CHECK_TRUE;
+        [alertView show];
+    }
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
@@ -131,7 +227,7 @@ shouldAllowExtensionPointIdentifier:(NSString *)extensionPointIdentifier
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication
 annotation:(id)annotation
 {
-    if (! [url.scheme isEqual:@"litecoin"] && ! [url.scheme isEqual:@"loaf"]) {
+    if (! [url.scheme isEqual:@"TosCoin"] && ! [url.scheme isEqual:@"loaf"]) {
         [[[UIAlertView alloc] initWithTitle:@"Not a bitcoin URL" message:url.absoluteString delegate:nil
           cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
         return NO;
@@ -180,7 +276,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult))completionH
             NSLog(@"background fetch protected data available");
             [[BRPeerManager sharedInstance] connect];
         }];
-
+    
     syncFinishedObserver =
         [[NSNotificationCenter defaultCenter] addObserverForName:BRPeerManagerSyncFinishedNotification object:nil
         queue:nil usingBlock:^(NSNotification *note) {
@@ -209,6 +305,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult))completionH
 //        [UIApplication sharedApplication].applicationIconBadgeNumber == 0) {
 //        [UIApplication sharedApplication].applicationIconBadgeNumber = 1;
 //    }
+    
 }
 
 - (void)setupBalanceNotification:(UIApplication *)application
@@ -336,6 +433,26 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult))completionH
     if (self.balanceObserver) [[NSNotificationCenter defaultCenter] removeObserver:self.balanceObserver];
 }
 
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    if (alertView.tag == DF_ALERT_TAG_VERSION_CHECK_FALSE) {
+        if (buttonIndex == 1) {
+            NSString *updateUrl = [NSString stringWithFormat:@"%@",[[NSUserDefaults standardUserDefaults] objectForKey:@DF_UPDATE_URL]];
+            NSLog(@"DF_UPDATE_URL : %@",[[NSUserDefaults standardUserDefaults] objectForKey:@DF_UPDATE_URL]);
+//            NSString *appSchemes = @"http://www.naver.com";
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:updateUrl]];
+            exit(0);
+        }
+    }else if (alertView.tag == DF_ALERT_TAG_VERSION_CHECK_TRUE){
+        if (buttonIndex == 0) {
+            NSString *updateUrl = [NSString stringWithFormat:@"%@",[[NSUserDefaults standardUserDefaults] objectForKey:@DF_UPDATE_URL]];
+            NSLog(@"DF_UPDATE_URL : %@",[[NSUserDefaults standardUserDefaults] objectForKey:@DF_UPDATE_URL]);
+            //            NSString *appSchemes = @"http://www.naver.com";
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:updateUrl]];
+            exit(0);
+        }
+    }
+}
+
 // MARK: - PKPushRegistry
 
 - (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials
@@ -354,8 +471,8 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult))completionH
 
 - (void)pushRegistry:(PKPushRegistry *)registry didInvalidatePushTokenForType:(NSString *)type
 {
-    NSLog(@"Push registry did invalidate push token for type: %@", type);
-}
+        NSLog(@"Push registry did invalidate push token for type: %@", type);
+    }
 
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload
              forType:(NSString *)type

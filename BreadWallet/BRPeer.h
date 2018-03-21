@@ -1,10 +1,11 @@
 //
 //  BRPeer.h
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 10/9/13.
 //  Copyright (c) 2013 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -26,19 +27,19 @@
 
 #import <Foundation/Foundation.h>
 
-
 #if BITCOIN_TESTNET
-#define BITCOIN_STANDARD_PORT 19335
+#define BITCOIN_STANDARD_PORT 33813
 #else
-#define BITCOIN_STANDARD_PORT 9333
+#define BITCOIN_STANDARD_PORT 24147
 #endif
 
 #define BITCOIN_TIMEOUT_CODE  1001
 
 #define SERVICES_NODE_NETWORK 0x01 // services value indicating a node carries full blocks, not just headers
 #define SERVICES_NODE_BLOOM   0x04 // BIP111: https://github.com/bitcoin/bips/blob/master/bip-0111.mediawiki
-#define USER_AGENT            [NSString stringWithFormat:@"/loaf:%@/",\
+#define USER_AGENT            [NSString stringWithFormat:@"/TosWallet:%@/",\
                                NSBundle.mainBundle.infoDictionary[@"CFBundleShortVersionString"]]
+// default : stringWithFormat:@"/loaf:%@/"
 
 // explanation of message types at: https://en.bitcoin.it/wiki/Protocol_specification
 #define MSG_VERSION     @"version"

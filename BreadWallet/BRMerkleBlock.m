@@ -1,10 +1,11 @@
 //
 //  BRMerkleBlock.m
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 10/22/13.
 //  Copyright (c) 2013 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -194,7 +195,7 @@ totalTransactions:(uint32_t)totalTransactions hashes:(NSData *)hashes flags:(NSD
     
     return YES;
 }
-
+//1294
 - (NSData *)toData
 {
     NSMutableData *d = [NSMutableData data];

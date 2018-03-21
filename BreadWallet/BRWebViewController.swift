@@ -1,6 +1,6 @@
 //
 //  BRWebViewController.swift
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Samuel Sutch on 12/10/15.
 //  Copyright (c) 2016 breadwallet LLC

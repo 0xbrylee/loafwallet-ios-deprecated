@@ -1,10 +1,11 @@
 //
 //  BRAmountViewController.m
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 6/4/13.
 //  Copyright (c) 2013 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -85,7 +86,7 @@
         usingBlock:^(NSNotification *note) {
             if ([BRPeerManager sharedInstance].syncProgress < 1.0) return; // wait for sync before updating balance
 
-            self.navigationItem.title = [NSString stringWithFormat:@"%@  LTC",
+            self.navigationItem.title = [NSString stringWithFormat:@"%@   TOS",
                                          [manager stringForAmount:manager.wallet.balance]];
         }];
     
@@ -118,6 +119,7 @@
 //        self.memoField.userInteractionEnabled = YES;
 //        self.memoField.placeholder = NSLocalizedString(@"memo:", nil);
         self.payButton.title = NSLocalizedString(@"request", nil);
+        self.payButton.tintColor = [UIColor whiteColor];
         self.navigationItem.rightBarButtonItem = self.payButton;
     }
 
@@ -166,8 +168,7 @@
     NSUInteger l = [self.amountField.text rangeOfCharacterFromSet:self.charset options:NSBackwardsSearch].location;
 
     l = (l < self.amountField.text.length) ? l + 1 : self.amountField.text.length;
-    [self textField:self.amountField shouldChangeCharactersInRange:NSMakeRange(l, 0)
-     replacementString:((UIButton *)sender).titleLabel.text];
+    [self textField:self.amountField shouldChangeCharactersInRange:NSMakeRange(l, 0) replacementString:((UIButton *)sender).titleLabel.text];
 }
 
 - (IBAction)del:(id)sender

@@ -5,37 +5,37 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>LoafWallet</string>
+	<string>TosWallet</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
 			<key>CFBundleTypeIconFiles</key>
 			<array/>
 			<key>CFBundleTypeName</key>
-			<string>Litecoin Payment Request</string>
+			<string>toscoin Payment Request</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>litecoin.paymentrequest</string>
+				<string>toscoin.paymentrequest</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeIconFiles</key>
 			<array/>
 			<key>CFBundleTypeName</key>
-			<string>Litecoin Payment</string>
+			<string>toscoin Payment</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>litecoin.payment</string>
+				<string>toscoin.payment</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeIconFiles</key>
 			<array/>
 			<key>CFBundleTypeName</key>
-			<string>Litecoin Payment ACK</string>
+			<string>toscoin Payment ACK</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>litecoin.paymentack</string>
+				<string>toscoin.paymentack</string>
 			</array>
 		</dict>
 	</array>
@@ -50,7 +50,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.3</string>
+	<string>1.3.2</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -59,17 +59,17 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>litecoin</string>
+			<string>TosCoin</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>litecoin</string>
+				<string>TosCoin</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.litecoin.loafwallet</string>
+			<string>com.tosblock.toswallet</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>loaf</string>
@@ -87,7 +87,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>2</string>
+	<string>1</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
@@ -132,13 +132,13 @@
 				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>Litecoin Payment Request</string>
+			<string>toscoin Payment Request</string>
 			<key>UTTypeIdentifier</key>
-			<string>litecoin.paymentrequest</string>
+			<string>toscoin.paymentrequest</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.mime-type</key>
-				<string>application/litecoin-paymentrequest</string>
+				<string>application/toscoin-paymentrequest</string>
 			</dict>
 		</dict>
 		<dict>
@@ -147,13 +147,13 @@
 				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>Litecoin Payment</string>
+			<string>toscoin Payment</string>
 			<key>UTTypeIdentifier</key>
-			<string>litecoin.payment</string>
+			<string>toscoin.payment</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.mime-type</key>
-				<string>application/litecoin-payment</string>
+				<string>application/toscoin-payment</string>
 			</dict>
 		</dict>
 		<dict>
@@ -162,13 +162,13 @@
 				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>Litecoin Payment ACK</string>
+			<string>toscoin Payment ACK</string>
 			<key>UTTypeIdentifier</key>
-			<string>litecoin.paymentack</string>
+			<string>toscoin.paymentack</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.mime-type</key>
-				<string>application/litecoin-paymentack</string>
+				<string>application/toscoin-paymentack</string>
 			</dict>
 		</dict>
 	</array>

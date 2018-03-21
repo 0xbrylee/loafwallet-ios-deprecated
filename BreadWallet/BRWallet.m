@@ -1,10 +1,11 @@
 //
 //  BRWallet.m
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 5/12/13.
 //  Copyright (c) 2013 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -655,6 +656,7 @@ masterPublicKey:(NSData *)masterPublicKey seed:(NSData *(^)(NSString *authprompt
 }
 
 // returns the transaction with the given hash if it's been registered in the wallet (might also return non-registered)
+
 - (BRTransaction *)transactionForHash:(UInt256)txHash
 {
     return self.allTx[uint256_obj(txHash)];

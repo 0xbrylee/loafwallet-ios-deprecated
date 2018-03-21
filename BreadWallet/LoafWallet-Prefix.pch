@@ -16,6 +16,11 @@
 #define PEER_LOGGING    1
 #define EVENT_LOGGING   1
 
+#define DF_UPDATE_URL "UPDATE_URL"
+#define DF_IS_RECOVER_MENU "IS_RECOVER_MENU"
+
+#define DF_MAXIMUM_FRACTION_DIGITS 6
+
 #if ! DEBUG
 #define NSLog(...)
 #endif

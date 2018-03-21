@@ -1,10 +1,11 @@
 //
 //  BRHTTPServer.swift
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Samuel Sutch on 2/8/16.
 //  Copyright (c) 2016 breadwallet LLC
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -166,7 +167,7 @@ enum BRHTTPServerError: Error {
         nc.removeObserver(self, name: .UIApplicationDidBecomeActive, object: nil)
     }
     
-    func suspend(_: Notification) {
+    @objc func suspend(_: Notification) {
         if isStarted {
             if self.clients.count == 0 {
                 shutdownServer()
@@ -184,7 +185,7 @@ enum BRHTTPServerError: Error {
         }
     }
     
-    func resume(_: Notification) {
+    @objc func resume(_: Notification) {
         if !isStarted {
             do {
                 try listenServer(port)
@@ -454,8 +455,8 @@ enum BRHTTPServerError: Error {
             , match.numberOfRanges == 3 else {
                 throw BRHTTPServerError.invalidRangeHeader
         }
-        let startStr = (rngHeader as NSString).substring(with: match.rangeAt(1))
-        let endStr = (rngHeader as NSString).substring(with: match.rangeAt(2))
+        let startStr = (rngHeader as NSString).substring(with: match.range(at: 1))
+        let endStr = (rngHeader as NSString).substring(with: match.range(at: 2))
         guard let start = Int(startStr), let end = Int(endStr) else {
             throw BRHTTPServerError.invalidRangeHeader
         }

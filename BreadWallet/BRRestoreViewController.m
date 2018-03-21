@@ -1,10 +1,11 @@
 //
 //  BRRestoreViewController.m
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 6/13/13.
 //  Copyright (c) 2013 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -46,6 +47,7 @@
 
 @implementation BRRestoreViewController
 
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -53,7 +55,20 @@
     
     // TODO: create secure versions of keyboard and UILabel and use in place of UITextView
     // TODO: autocomplete based on 4 letter prefixes of mnemonic words
+//    [UINavigationBar appearance].tintColor = [UIColor blackColor];
+//    [UINavigationBar appearance].title = [UIColor blackColor];
+//
+//
+//    UINavigationBar.appearance().titleTextAttributes = attribute;
     
+    
+//    NSMutableDictionary *attribute = [NSMutableDictionary dictionary];
+//    attribute[NSForegroundColorAttributeName] = [UIColor blackColor];
+//
+//    [UINavigationBar appearance].titleTextAttributes = attribute;
+//    [[UINavigationBar appearance] setBarTintColor:[UIColor orangeColor]];
+
+
     self.textView.layer.cornerRadius = 5.0;
     
     self.keyboardObserver =
@@ -82,7 +97,6 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-
     [self.textView becomeFirstResponder];
 }
 
@@ -110,8 +124,10 @@
         
         NSData *mpk = manager.masterPublicKey;
         
+        
         if ([[manager.sequence masterPublicKeyFromSeed:[manager.mnemonic deriveKeyFromPhrase:phrase withPassphrase:nil]]
              isEqual:mpk] || [phrase isEqual:@"wipe"]) {
+            
             [BREventManager saveEvent:@"restore:wipe_good_recovery_phrase"];
             [[[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:NSLocalizedString(@"cancel", nil)
               destructiveButtonTitle:NSLocalizedString(@"wipe", nil) otherButtonTitles:nil]
@@ -122,7 +138,9 @@
             [[[UIAlertView alloc] initWithTitle:@"" message:NSLocalizedString(@"recovery phrase doesn't match", nil)
               delegate:nil cancelButtonTitle:NSLocalizedString(@"ok", nil) otherButtonTitles:nil] show];
         }
-        else [self.textView becomeFirstResponder];
+        else {
+            [self.textView becomeFirstResponder];
+        }
     }
 }
 
@@ -152,8 +170,9 @@
         invalid = set.invertedSet;
     });
 
-    if (! [text isEqual:@"\n"]) return YES; // not done entering phrase
-    
+    if (! [text isEqual:@"\n"]) {
+        return YES; // not done entering phrase
+    }
     @autoreleasepool {  // @autoreleasepool ensures sensitive data will be deallocated immediately
         BRWalletManager *manager = [BRWalletManager sharedInstance];
         NSString *phrase = [manager.mnemonic cleanupPhrase:textView.text], *incorrect = nil;
@@ -219,7 +238,8 @@
             [[[UIAlertView alloc] initWithTitle:@"" message:NSLocalizedString(@"bad recovery phrase", nil) delegate:nil
               cancelButtonTitle:NSLocalizedString(@"ok", nil) otherButtonTitles:nil] show];
         }
-        else if (! noWallet) {
+        else if (! noWallet) { //t Confirm: 메뉴 (wipe진행할 때 == wallet이 존재할 때)
+     
             [self.textView resignFirstResponder];
             [self performSelector:@selector(wipeWithPhrase:) withObject:phrase afterDelay:0.0];
         }
@@ -230,7 +250,6 @@
             [self.navigationController.presentingViewController dismissViewControllerAnimated:YES completion:nil];
         }
     }
-    
     return NO;
 }
 

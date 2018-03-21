@@ -1,10 +1,11 @@
 //
 //  NSString+Bitcoin.h
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 5/13/13.
 //  Copyright (c) 2013 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -26,10 +27,10 @@
 
 #import <Foundation/Foundation.h>
 
-#define BITCOIN_PUBKEY_ADDRESS      48
-#define BITCOIN_SCRIPT_ADDRESS      50
+#define BITCOIN_PUBKEY_ADDRESS      66
+#define BITCOIN_SCRIPT_ADDRESS      5
 #define BITCOIN_PUBKEY_ADDRESS_TEST 111
-#define BITCOIN_SCRIPT_ADDRESS_TEST 58
+#define BITCOIN_SCRIPT_ADDRESS_TEST 196
 #define BITCOIN_PRIVKEY             176
 #define BITCOIN_PRIVKEY_TEST        239
 

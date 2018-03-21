@@ -1,6 +1,6 @@
 //
 //  BreadWalletUITests-Bridging-Header.h
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 5/3/16.
 //  Copyright (c) 2016 breadwallet LLC

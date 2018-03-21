@@ -1,10 +1,11 @@
 //
 //  BRSeedViewController.h
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 6/12/13.
 //  Copyright (c) 2013 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -33,5 +34,8 @@
 @property (strong, nonatomic) IBOutlet UILabel *descriptionLabel;
 @property (strong, nonatomic) IBOutlet UIButton *skipButton;
 @property (strong, nonatomic) IBOutlet UIButton *progessButton;
+@property (strong, nonatomic) IBOutlet UIImageView *bgImageView;
+@property (strong, nonatomic) IBOutlet UIButton *copyedButton;
+
 
 @end

@@ -1,10 +1,11 @@
 //
 //  BRWelcomeViewController.m
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 7/8/13.
 //  Copyright (c) 2013 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +43,7 @@
 @property (nonatomic, strong) IBOutlet NSLayoutConstraint *logoXCenter, *walletXCenter, *restoreXCenter,
                                                           *paralaxXLeft, *wallpaperXLeft;
 
+
 @end
 
 
@@ -54,23 +56,26 @@
         
     self.navigationController.delegate = self;
 
-    self.newwalletButton.titleLabel.adjustsFontSizeToFitWidth = YES;
-    self.recoverButton.titleLabel.adjustsFontSizeToFitWidth = YES;
-    
-    self.newwalletButton.layer.cornerRadius = 2;
-    self.newwalletButton.layer.borderWidth = 2;
-    self.newwalletButton.layer.borderColor = [UIColor whiteColor].CGColor;
-    self.newwalletButton.clipsToBounds = YES;
-    
-    self.recoverButton.layer.cornerRadius = 2;
-    self.recoverButton.layer.borderWidth = 2;
-    self.recoverButton.layer.borderColor = [UIColor whiteColor].CGColor;
-    self.recoverButton.clipsToBounds = YES;
+    [[NSUserDefaults standardUserDefaults] setBool:FALSE forKey:@DF_IS_RECOVER_MENU];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+
+//    self.newwalletButton.titleLabel.adjustsFontSizeToFitWidth = YES;
+//    self.recoverButton.titleLabel.adjustsFontSizeToFitWidth = YES;
+//
+//    self.newwalletButton.layer.cornerRadius = 2;
+//    self.newwalletButton.layer.borderWidth = 2;
+//    self.newwalletButton.layer.borderColor = [UIColor whiteColor].CGColor;
+//        self.newwalletButton.clipsToBounds = YES;
+//
+//    self.recoverButton.layer.cornerRadius = 2;
+//    self.recoverButton.layer.borderWidth = 2;
+//    self.recoverButton.layer.borderColor = [UIColor whiteColor].CGColor;
+//    self.recoverButton.clipsToBounds = YES;
     
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    self.newwalletButton.titleLabel.adjustsLetterSpacingToFitWidth = YES;
-    self.recoverButton.titleLabel.adjustsLetterSpacingToFitWidth = YES;
+//    self.newwalletButton.titleLabel.adjustsLetterSpacingToFitWidth = YES;
+//    self.recoverButton.titleLabel.adjustsLetterSpacingToFitWidth = YES;
 #pragma clang diagnostic pop
 
     self.foregroundObserver =
@@ -114,51 +119,51 @@
     [super viewDidAppear:animated];
     [BREventManager saveEvent:@"welcome:shown"];
 
-    dispatch_async(dispatch_get_main_queue(), ^{ // animation sometimes doesn't work if run directly in viewDidAppear
+//    dispatch_async(dispatch_get_main_queue(), ^{ // animation sometimes doesn't work if run directly in viewDidAppear
 #if SNAPSHOT
-        [[UIApplication sharedApplication] setStatusBarHidden:NO];
-        self.navigationItem.titleView.hidden = NO;
-        self.navigationItem.titleView.alpha = 1.0;
-        self.logoXCenter.constant = self.view.frame.size.width;
-        self.walletXCenter.constant = self.restoreXCenter.constant = 0.0;
-        self.paralaxXLeft.constant = self.view.frame.size.width*PARALAX_RATIO;
-        return;
+//        [[UIApplication sharedApplication] setStatusBarHidden:NO];
+//        self.navigationItem.titleView.hidden = NO;
+//        self.navigationItem.titleView.alpha = 1.0;
+//        self.logoXCenter.constant = self.view.frame.size.width;
+//        self.walletXCenter.constant = self.restoreXCenter.constant = 0.0;
+//        self.paralaxXLeft.constant = self.view.frame.size.width*PARALAX_RATIO;
+//        return;
 #endif
 
-        if (! [BRWalletManager sharedInstance].noWallet) { // sanity check
-            [self.navigationController.presentingViewController dismissViewControllerAnimated:NO completion:nil];
-        }
-        
-        if (! self.hasAppeared) {
-            self.hasAppeared = YES;
-            self.paralaxXLeft = [NSLayoutConstraint constraintWithItem:self.navigationController.view
-                                 attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:self.paralax
-                                 attribute:NSLayoutAttributeLeading multiplier:1.0 constant:0.0];
-            [self.navigationController.view insertSubview:self.paralax atIndex:0];
-            [self.navigationController.view addConstraint:self.paralaxXLeft];
-            [self.navigationController.view
-             addConstraint:[NSLayoutConstraint constraintWithItem:self.navigationController.view
-                            attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.paralax
-                            attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0]];
-//            self.navigationController.view.backgroundColor = self.paralax.backgroundColor;
-            self.navigationController.view.clipsToBounds = YES;
-            self.navigationController.view.backgroundColor = [UIColor blackColor];
-            [self.navigationController.view layoutIfNeeded];
-            self.logoXCenter.constant = self.view.frame.size.width;
-            self.walletXCenter.constant = 0.0;
-            self.restoreXCenter.constant = 0.0;
-//            self.paralaxXLeft.constant = self.view.frame.size.width*PARALAX_RATIO;
-            self.navigationItem.titleView.hidden = NO;
-            self.navigationItem.titleView.alpha = 0.0;
-
-            [UIView animateWithDuration:0.35 delay:1.0 usingSpringWithDamping:0.8 initialSpringVelocity:0.0
-            options:UIViewAnimationOptionCurveEaseOut animations:^{
-                [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationSlide];
-                self.navigationItem.titleView.alpha = 1.0;
-                [self.navigationController.view layoutIfNeeded];
-            } completion:nil];
-        }
-    });
+//        if (! [BRWalletManager sharedInstance].noWallet) { // sanity check
+//            [self.navigationController.presentingViewController dismissViewControllerAnimated:NO completion:nil];
+//        }
+//
+//        if (! self.hasAppeared) {
+//            self.hasAppeared = YES;
+//            self.paralaxXLeft = [NSLayoutConstraint constraintWithItem:self.navigationController.view
+//                                 attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:self.paralax
+//                                 attribute:NSLayoutAttributeLeading multiplier:1.0 constant:0.0];
+//            [self.navigationController.view insertSubview:self.paralax atIndex:0];
+//            [self.navigationController.view addConstraint:self.paralaxXLeft];
+//            [self.navigationController.view
+//             addConstraint:[NSLayoutConstraint constraintWithItem:self.navigationController.view
+//                            attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.paralax
+//                            attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0]];
+////            self.navigationController.view.backgroundColor = self.paralax.backgroundColor;
+//            self.navigationController.view.clipsToBounds = YES;
+//            self.navigationController.view.backgroundColor = [UIColor blackColor];
+//            [self.navigationController.view layoutIfNeeded];
+//            self.logoXCenter.constant = self.view.frame.size.width;
+//            self.walletXCenter.constant = 0.0;
+//            self.restoreXCenter.constant = 0.0;
+////            self.paralaxXLeft.constant = self.view.frame.size.width*PARALAX_RATIO;
+//            self.navigationItem.titleView.hidden = NO;
+//            self.navigationItem.titleView.alpha = 0.0;
+//
+//            [UIView animateWithDuration:0.35 delay:1.0 usingSpringWithDamping:0.8 initialSpringVelocity:0.0
+//            options:UIViewAnimationOptionCurveEaseOut animations:^{
+//                [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationSlide];
+//                self.navigationItem.titleView.alpha = 1.0;
+//                [self.navigationController.view layoutIfNeeded];
+//            } completion:nil];
+//        }
+//    });
 }
 
 //- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
@@ -206,23 +211,23 @@
     [self.showButton addTarget:self action:@selector(show:) forControlEvents:UIControlEventTouchUpInside];
     self.startLabel = (id)[c.view viewWithTag:4];
     self.recoverLabel = (id)[c.view viewWithTag:5];
-    
+
     NSTextAttachment *noEye = [NSTextAttachment new], *noKey = [NSTextAttachment new];
     NSMutableAttributedString *s = [[NSMutableAttributedString alloc]
                                     initWithAttributedString:self.warningLabel.attributedText];
-    
+
     noEye.image = [UIImage imageNamed:@"no-eye"];
     [s replaceCharactersInRange:[s.string rangeOfString:@"%no-eye%"]
      withAttributedString:[NSAttributedString attributedStringWithAttachment:noEye]];
     noKey.image = [UIImage imageNamed:@"no-key"];
     [s replaceCharactersInRange:[s.string rangeOfString:@"%no-key%"]
      withAttributedString:[NSAttributedString attributedStringWithAttachment:noKey]];
-    
+
     [s replaceCharactersInRange:[s.string rangeOfString:@"WARNING"] withString:NSLocalizedString(@"WARNING", nil)];
     [s replaceCharactersInRange:[s.string rangeOfString:@"\nDO NOT let anyone see your recovery\n"
-                                 "phrase or they can spend your bitcoins.\n"]
+                                 "phrase or they can spend your toscoins.\n"]
      withString:NSLocalizedString(@"\nDO NOT let anyone see your recovery\n"
-                                  "phrase or they can spend your bitcoins.\n", nil)];
+                                  "phrase or they can spend your toscoins.\n", nil)];
     [s replaceCharactersInRange:[s.string rangeOfString:@"\nNEVER type your recovery phrase into\n"
                                  "password managers or elsewhere.\nOther devices may be infected.\n"]
      withString:NSLocalizedString(@"\nNEVER type your recovery phrase into\npassword managers or elsewhere.\n"
@@ -230,15 +235,16 @@
     self.warningLabel.attributedText = s;
     self.generateButton.superview.backgroundColor = [UIColor clearColor];
     
+//    c.view.backgroundColor = [UIColor redColor];
     [self.navigationController pushViewController:c animated:YES];
 }
 
 - (IBAction)recover:(id)sender
 {
     [BREventManager saveEvent:@"welcome:recover_wallet"];
+    [UINavigationBar appearance].tintColor = [UIColor blackColor];
 
     UIViewController *c = [self.storyboard instantiateViewControllerWithIdentifier:@"RecoverViewController"];
-
     [self.navigationController pushViewController:c animated:YES];
 }
 

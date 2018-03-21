@@ -1,10 +1,11 @@
 //
 //  BRTxDetailViewController.m
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 7/23/14.
 //  Copyright (c) 2014 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -324,7 +325,7 @@
 {
     NSString *sectionTitle = [self tableView:tableView titleForHeaderInSection:section];
     
-    if (sectionTitle.length == 0) return 22.0;
+    if (sectionTitle.length == 0) return 0.0;
     
     CGRect textRect = [sectionTitle boundingRectWithSize:CGSizeMake(self.view.frame.size.width - 30.0, CGFLOAT_MAX)
                 options:NSStringDrawingUsesLineFragmentOrigin

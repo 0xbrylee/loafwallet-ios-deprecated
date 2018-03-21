@@ -1,6 +1,6 @@
 //
 //  BRKVStoreObjects.swift
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Samuel Sutch on 8/13/16.
 //  Copyright © 2016 breadwallet LLC. All rights reserved.

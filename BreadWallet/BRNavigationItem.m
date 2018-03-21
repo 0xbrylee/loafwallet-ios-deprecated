@@ -1,10 +1,11 @@
 //
 //  BRNavigationItem.m
-//  LoafWallet
+//  TosWallet
 //
 //  Created by Sergey Shvedov on 14.06.16.
 //  Copyright (c) 2016 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -54,7 +55,7 @@ static void *kTitleViewStateObservingContext = &kTitleViewStateObservingContext;
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
 	if ( context == kTitleStateObservingContext ) {
-		if ((nil == self.title) || ([self.title rangeOfString:@"  LTC"].location == NSNotFound)) {
+		if ((nil == self.title) || ([self.title rangeOfString:@"  1TOS"].location == NSNotFound)) {
 			self.titleView = nil;
 		} else {
 			[self updateLabel];
@@ -86,7 +87,7 @@ static void *kTitleViewStateObservingContext = &kTitleViewStateObservingContext;
 		UIFont *titleFont = [UIFont fontWithName:@"HelveticaNeue-Medium" size:23.0];
 		UIFont *smallFont = [UIFont fontWithName:@"HelveticaNeue-Light" size:12.0];
 		NSString *simpleString = self.title;
-		NSRange range = [simpleString rangeOfString:@"  LTC"];
+		NSRange range = [simpleString rangeOfString:@"  TOS"];
 		range.length = (simpleString.length - range.location);
 		
 		NSMutableAttributedString *stylizedString = [[NSMutableAttributedString alloc] initWithString:simpleString];

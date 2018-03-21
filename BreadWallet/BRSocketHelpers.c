@@ -1,10 +1,11 @@
 //
 //  BRSocketHelpers.c
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Samuel Sutch on 2/17/16.
 //  Copyright (c) 2016 breadwallet LLC
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +31,7 @@
 #include <sys/socket.h>
 #include <sys/select.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 int bw_nbioify(int fd) {
     int flags = fcntl(fd, F_GETFL, 0);

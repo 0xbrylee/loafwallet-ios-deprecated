@@ -1,10 +1,11 @@
 //
 //  BRPaymentRequest.m
-//  BreadWallet
+//  TosWallet
 //
 //  Created by Aaron Voisine on 5/9/13.
 //  Copyright (c) 2013 Aaron Voisine <voisine@gmail.com>
 //  Copyright © 2016 Litecoin Association <loshan1212@gmail.com>
+//  Copyright (c) 2018 Blockware Corp. <admin@blockware.co.kr>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -81,7 +82,7 @@
     NSURL *url = [NSURL URLWithString:s];
 
     if (! url || ! url.scheme) {
-        url = [NSURL URLWithString:[NSString stringWithFormat:@"litecoin://%@", s]];
+        url = [NSURL URLWithString:[NSString stringWithFormat:@"TosCoin://%@", s]];
     }
     else if (! url.host && url.resourceSpecifier) {
         url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@", url.scheme, url.resourceSpecifier]];
@@ -89,7 +90,7 @@
 
     self.scheme = url.scheme;
 
-    if ([url.scheme isEqual:@"litecoin"]) {
+    if ([url.scheme isEqual:@"TosCoin"]) {
         self.paymentAddress = url.host;
 
         //TODO: correctly handle unknown but required url arguments (by reporting the request invalid)
@@ -106,8 +107,10 @@
                 NSDecimal dec, amount;
 
                 if ([[NSScanner scannerWithString:value] scanDecimal:&dec]) {
-                    NSDecimalMultiplyByPowerOf10(&amount, &dec, 8, NSRoundUp);
+                    NSDecimalMultiplyByPowerOf10(&amount, &dec, DF_MAXIMUM_FRACTION_DIGITS, NSRoundUp);
                     self.amount = [NSDecimalNumber decimalNumberWithDecimal:amount].unsignedLongLongValue;
+                    NSLog(@"self.amount3 :%llu",self.amount);
+
                 }
             }
             else if ([pair[0] isEqual:@"label"]) {
@@ -124,19 +127,27 @@
 
 - (NSString *)string
 {
-    if (! [self.scheme isEqual:@"litecoin"]) return self.r;
+    if (! [self.scheme isEqual:@"TosCoin"]) return self.r;
 
-    NSMutableString *s = [NSMutableString stringWithString:@"litecoin:"];
+    
+    NSLog(@"self.amount :%llu",self.amount);
+    
+    NSMutableString *s = [NSMutableString stringWithString:@"TosCoin:"];
     NSMutableArray *q = [NSMutableArray array];
     NSMutableCharacterSet *charset = [[NSCharacterSet URLQueryAllowedCharacterSet] mutableCopy];
 
     [charset removeCharactersInString:@"&="];
     if (self.paymentAddress) [s appendString:self.paymentAddress];
 
+    /**
+     
+     */
     if (self.amount > 0) {
         [q addObject:[@"amount=" stringByAppendingString:[(id)[NSDecimalNumber numberWithUnsignedLongLong:self.amount]
-                                                          decimalNumberByMultiplyingByPowerOf10:-8].stringValue]];
+            decimalNumberByMultiplyingByPowerOf10:-DF_MAXIMUM_FRACTION_DIGITS].stringValue]];
+        
     }
+    
 
     if (self.label.length > 0) {
         [q addObject:[@"label=" stringByAppendingString:[self.label
@@ -219,7 +230,7 @@ completion:(void (^)(BRPaymentProtocolRequest *req, NSError *error))completion
     NSMutableURLRequest *req = (u) ? [NSMutableURLRequest requestWithURL:u
                                       cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:timeout] : nil;
 
-    [req setValue:@"application/litecoin-paymentrequest" forHTTPHeaderField:@"Accept"];
+    [req setValue:@"application/toscoin-paymentrequest" forHTTPHeaderField:@"Accept"];
 //  [req addValue:@"text/uri-list" forHTTPHeaderField:@"Accept"]; // breaks some BIP72 implementations, notably bitpay's
 
     if (! req) {
@@ -242,7 +253,7 @@ completion:(void (^)(BRPaymentProtocolRequest *req, NSError *error))completion
         network = @"test";
 #endif
 
-        if ([response.MIMEType.lowercaseString isEqual:@"application/litecoin-paymentrequest"] && data.length <= 50000) {
+        if ([response.MIMEType.lowercaseString isEqual:@"application/toscoin-paymentrequest"] && data.length <= 50000) {
             request = [BRPaymentProtocolRequest requestWithData:data];
         }
         else if ([response.MIMEType.lowercaseString isEqual:@"text/uri-list"] && data.length <= 50000) {
@@ -286,8 +297,8 @@ completion:(void (^)(BRPaymentProtocolACK *ack, NSError *error))completion
         return;
     }
 
-    [req setValue:@"application/litecoin-payment" forHTTPHeaderField:@"Content-Type"];
-    [req addValue:@"application/litecoin-paymentack" forHTTPHeaderField:@"Accept"];
+    [req setValue:@"application/toscoin-payment" forHTTPHeaderField:@"Content-Type"];
+    [req addValue:@"application/toscoin-paymentack" forHTTPHeaderField:@"Accept"];
     req.HTTPMethod = @"POST";
     req.HTTPBody = payment.data;
 
@@ -300,7 +311,7 @@ completion:(void (^)(BRPaymentProtocolACK *ack, NSError *error))completion
 
         BRPaymentProtocolACK *ack = nil;
 
-        if ([response.MIMEType.lowercaseString isEqual:@"application/litecoin-paymentack"] && data.length <= 50000) {
+        if ([response.MIMEType.lowercaseString isEqual:@"application/toscoin-paymentack"] && data.length <= 50000) {
             ack = [BRPaymentProtocolACK ackWithData:data];
         }
 
