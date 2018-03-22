@@ -21,7 +21,7 @@ Simplicity is **TosWallet**'s core design principle. A simple backup phrase is a
 
 ### Features:
 - Securely store your TOS coin addresses and their private keys.
-- Directly connect to the TOS coin Network using SPV["Simplified payment verification"](https://github.com/bitcoin/bips/blob/master/bip-0037.mediawiki) mode.
+- Directly connect to the TOS coin Network using SPV[(Simplified payment verification)](https://github.com/bitcoin/bips/blob/master/bip-0037.mediawiki) mode.
 - Import [password protected](https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki) paper wallets
 - Create multiple wallets with multiple TOS coin addresses for each wallet.
 - Create wallets for TOS coin.
