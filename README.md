@@ -21,17 +21,16 @@ Simplicity is **TosWallet**'s core design principle. A simple backup phrase is a
 
 ### Features:
 - Securely store your TOS coin addresses and their private keys.
-- ["Simplified payment verification"](https://github.com/bitcoin/bips/blob/master/bip-0037.mediawiki) for fast mobile performance
+- Directly connect to the TOS coin Network using SPV["Simplified payment verification"](https://github.com/bitcoin/bips/blob/master/bip-0037.mediawiki) mode.
 - Import [password protected](https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki) paper wallets
-- ["Payment protocol"](https://github.com/bitcoin/bips/blob/master/bip-0070.mediawiki) payee identity certification
 - Create multiple wallets with multiple TOS coin addresses for each wallet.
 - Create wallets for TOS coin.
+- ["Payment protocol"](https://github.com/bitcoin/bips/blob/master/bip-0070.mediawiki) payee identity certification
 - Send payments directly from the app.
 - Receive notifications when new transactions occur in your wallet.
 - Check balances and transactions in each wallet with different TOS coin address.
 - Verify balances and transactions from multiple data sources.
 - Check the price of TOS coin, in multiple currencies, from all TOS coin exchanges.
-- Directly connect to the TOS coin Network using SPV mode.
 - TOS Wallet is FREE. for now.
 
 ### URL scheme:
