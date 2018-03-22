@@ -1,7 +1,7 @@
 TosWallet for iOS
 ----------------------------------
 
-[[Download here](http://toswallet.tosblock.com/download/)
+[Download here](http://toswallet.tosblock.com/download/)
 
 ## Toscoin done right
 
